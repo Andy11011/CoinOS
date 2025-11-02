@@ -357,3 +357,63 @@ git commit -m "Initial CoinOS project structure with rpi-image-gen"
 # Push to GitHub
 
 git push origin main
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+✅ GitHub hook trigger for GITScm polling - CHECK THIS ⭐
+Why: This is the "proper" way to trigger builds automatically when you push to GitHub.
+How it works:
+
+You push code to GitHub
+GitHub sends webhook to Jenkins
+Jenkins automatically starts build
+
+⚠️ IMPORTANT: This only works if:
+
+Jenkins is publicly accessible (has public IP/domain)
+OR you're using a tunneling service (ngrok, localhost.run)
+OR Jenkins is on a cloud instance
+
+If Jenkins is on your laptop behind a router, webhooks WON'T work (GitHub can't reach your laptop).
+
+⚪ Poll SCM - CHECK THIS as backup/alternative
+Why: If webhooks don't work (Jenkins on laptop), polling is the fallback.
+Schedule: H/5 **** (checks GitHub every 5 minutes)
+How it works:
+
+Jenkins asks GitHub every 5 minutes: "Any new commits?"
+If yes → starts build
+Less efficient than webhooks, but works everywhere
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+1. Click **"Build Now"** in the left sidebar
+2. Watch the build queue (bottom left)
+3. Click on the build number (e.g., #1) when it appears
+4. Click **"Console Output"** to see what's happening
+
+### **Expected Output:**
+
+You should see something like:
+
+```
+Started by user admin
+Checking out git https://github.com/YOUR_USERNAME/CoinOS.git...
+Cloning repository...
+Checking out Revision abc123...
+Running in /var/lib/jenkins/workspace/CoinOS-Build
+[Pipeline] stage (Checkout)
+[Pipeline] echo
+Checking out CoinOS repository...
+...
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Solution 2: Use Docker Agent ⭐ Recommended
+Jenkins runs on Windows, but builds happen inside Linux Docker containers.

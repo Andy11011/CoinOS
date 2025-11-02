@@ -1,11 +1,26 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'ubuntu:22.04'
+            args '-u root:root'
+        }
+    }
     
     stages {
         stage('Checkout') {
             steps {
                 echo 'Checking out CoinOS repository...'
                 checkout scm
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing build dependencies...'
+                sh '''
+                    apt-get update
+                    apt-get install -y git
+                '''
             }
         }
         
@@ -19,8 +34,7 @@ pipeline {
         stage('Build Image') {
             steps {
                 echo 'Building CoinOS image...'
-                // We'll add actual build later
-                sh 'echo "Build command will go here"'
+                sh 'echo "Build command will go here (needs more setup)"'
             }
         }
         
