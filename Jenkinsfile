@@ -6,8 +6,7 @@ pipeline {
             agent {
                 docker {
                     image 'ubuntu:22.04'
-                    args "-u root:root -v /${WORKSPACE.replaceAll('\\\\', '/')}:/workspace"
-                    workingDir '/workspace'
+                    args "-u root:root -v /${env.WORKSPACE.replaceAll('\\\\', '/')}:/workspace -w /workspace"
                 }
             }
             steps {
