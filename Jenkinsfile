@@ -4,7 +4,7 @@ pipeline {
             image 'ubuntu:22.04'
             args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
             // This tells Docker to use default working directory
-            reuseNode true
+            // reuseNode true - let's docker use it's own workspace
         }
     }
     

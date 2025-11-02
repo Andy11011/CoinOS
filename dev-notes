@@ -417,3 +417,37 @@ Checking out CoinOS repository...
 
 Solution 2: Use Docker Agent ⭐ Recommended
 Jenkins runs on Windows, but builds happen inside Linux Docker containers.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Jenkins workspace is on Windows: C:\ProgramData\Jenkins\.jenkins\workspace\CoinOS-Build\
+Jenkins converts to forward slashes: C:/ProgramData/Jenkins/.jenkins/workspace/CoinOS-Build/
+Docker needs Linux path: Expects something like /workspace or /mnt/c/...
+Path translation fails: Docker can't map Windows C:/ to Linux filesystem
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+
+1. Jenkins Controller (Windows) checks out code
+   ↓
+   Clones to: C:\ProgramData\Jenkins\.jenkins\workspace\CoinOS-Build\
+   ↓
+2. Jenkins reads the Jenkinsfile from that checkout
+   ↓
+3. Jenkins sees: agent { docker { ... } }
+   ↓
+4. Jenkins tries to start Docker container
+   ↓
+5. Jenkins tries to MOUNT the Windows workspace into container
+   ↓
+6. ❌ FAILS - Can't mount C:/ path into Linux container
+
+
+reuseNode true means: "Use the SAME workspace that was checked out on Windows"
+Jenkins tries to mount C:\ProgramData\Jenkins\... into the Docker container
+Docker says: "I can't work with Windows paths!"
