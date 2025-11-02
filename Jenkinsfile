@@ -1,12 +1,13 @@
 pipeline {
-    agent none  // Don't use any agent at pipeline level
+    agent none
     
     stages {
         stage('Build') {
             agent {
                 docker {
                     image 'ubuntu:22.04'
-                    args '-u root:root'
+                    args "-u root:root -v /${WORKSPACE.replaceAll('\\\\', '/')}:/workspace"
+                    workingDir '/workspace'
                 }
             }
             steps {
