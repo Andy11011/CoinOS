@@ -1,0 +1,359 @@
+//--------------------//
+//--------------------//
+//--------------------//
+
+The Debian build system is fundamentally different from Yocto. Here's how it works:
+Binary-based approach:
+
+- Debian maintains pre-compiled binary packages (.deb files) in repositories
+- Tools like apt, dpkg, and debootstrap install these binaries
+- rpi-image-gen uses these precompiled packages from Debian and Raspberry Pi OS repositories rather than compiling from source
+- Packages are built once by Debian maintainers, then distributed
+
+Package building (when you DO compile):
+
+- Uses dpkg-buildpackage, debhelper, and debian/rules files
+- Each package has a debian/ directory with build instructions
+- Source packages follow strict Debian policy
+- Results in .deb files uploaded to repositories
+
+Image creation tools:
+
+debootstrap - Creates minimal Debian root filesystem
+live-build - Creates live/installable images
+rpi-image-gen - Raspberry Pi's modern tool built on these foundations
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Yocto Project:
+
+Source-based - Compiles everything from scratch (kernel, packages, toolchain)
+Highly customizable - Control every compile flag, patch, dependency
+Build time - Hours to build a complete image
+Use case - When you need extreme customization, specific kernel versions, or non-standard architectures
+
+Debian approach (rpi-image-gen):
+
+Binary-based - Downloads pre-built packages
+Less flexible - Limited to what's in repositories
+Build time - Minutes to assemble an image
+Use case - Standard hardware, faster iteration, easier maintenance
+
+Analogy:
+
+Yocto = Building a car from raw materials in a factory
+Debian/rpi-image-gen = Assembling a car from pre-manufactured parts
+
+If you're targeting standard Raspberry Pi hardware and can work with Debian/Raspberry Pi OS packages, rpi-image-gen is much faster and simpler. Use Yocto only if you need:
+
+Custom kernel configurations
+Ultra-minimal images (< 50MB)
+Non-standard hardware support
+Complete control over every compiled binary
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+rpi-image-gen is an additional layer on top of the Debian build system. Here's what it adds:
+
+1. Raspberry Pi-specific image creation
+
+- Takes Debian's binary packages and assembles them into bootable Raspberry Pi images
+- Handles RPi-specific partitioning, boot firmware, and device tree configurations
+- The Debian build system just creates .deb packages - it doesn't create SD card images
+
+2. Declarative configuration
+
+- Uses YAML-based profiles, image layouts, and configuration files
+- You define WHAT you want (packages, users, settings) rather than HOW to build it
+- Much simpler than writing shell scripts to call debootstrap manually
+
+3. Modular composition
+
+- Profiles are collections of packages and operations that can be combined
+- Mix and match components (base system + WiFi + your app + security hardening)
+- Reusable building blocks for different image variants
+
+4. Enterprise/Industrial features
+
+- Generates Software Bill of Materials (SBOM) for compliance
+- Creates CVE (security vulnerability) reports
+- Integrates with rpi-sb-provisioner for secure boot and encrypted filesystems
+
+5. Reproducible builds
+
+- Same config = same image every time
+- Perfect for CI/CD pipelines
+- Version control your image definitions
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+┌─────────────────────────────┐
+│   Your CoinOS Image         │  ← Your project
+├─────────────────────────────┤
+│   rpi-image-gen             │  ← Orchestration & RPi-specific magic
+├─────────────────────────────┤
+│   Debian Build System       │  ← Package management (.deb files)
+├─────────────────────────────┤
+│   Debian/RPi OS Repos       │  ← Pre-compiled binaries
+└─────────────────────────────┘
+
+Without rpi-image-gen, you'd need to:
+
+Manually run debootstrap to create root filesystem
+Configure bootloader and firmware
+Set up partitions and filesystems
+Write custom scripts for everything
+Handle Raspberry Pi hardware quirks yourself
+
+rpi-image-gen automates all of that and provides a clean, maintainable way to define and build custom Raspberry Pi images using Debian packages.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Step 1: Install rpi-image-gen
+
+Step 2: Install dependencies
+
+Step 3: Create your first config
+
+Step 4: Test a basic build
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+rpi-image-gen uses Linux-specific tools:
+
+debootstrap - creates Debian root filesystems
+kpartx, losetup - manipulates disk images and partitions
+qemu-user-static - emulates ARM architecture
+Various filesystem tools (mkfs.ext4, mkfs.vfat)
+
+These simply don't exist on Windows.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Option 4: Docker Desktop + Linux containers
+
+Run builds inside Linux containers
+Requires privileged mode for image building
+More complex setup
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Privileged mode required - rpi-image-gen needs to mount filesystems, create loop devices, and manipulate disk images. Docker container needs --privileged flag
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+AWS EC2:
+
+Instance type: t3.medium or t3.large (2-4 vCPU, 4-8GB RAM)
+OS: Ubuntu 22.04 LTS or Debian 12
+Storage: 50-100GB EBS volume
+Cost: ~$30-60/month if running 24/7, or ~$5-10/month if you stop when not building
+
+GCP Compute Engine:
+
+Instance type: e2-medium or e2-standard-2
+OS: Ubuntu 22.04 LTS
+Storage: 50-100GB persistent disk
+Cost: Similar to AWS
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Windows (Edit files) → Git push → Jenkins (Docker agent) → Build in container → Artifacts
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+How it works:
+
+Edit on Windows - Use VS Code, your favorite editor
+Git commit & push - Push to GitHub/GitLab
+Jenkins triggers - Detects the push via webhook
+Spins up Docker container - Uses a Linux image with build tools
+Builds inside container - rpi-image-gen runs in the container
+Outputs artifact - Stores the .img file
+Container destroyed - Clean slate for next build
+
+Option 2: Jenkins on your laptop (WSL2/Docker Desktop)
+
+Jenkins runs locally
+Uses Docker Desktop to spawn build containers
+Only works when laptop is on
+Good for learning, not for production
+
+Option 3: Managed CI/CD
+
+Use GitLab CI/CD or GitHub Actions instead of Jenkins
+They provide runners (like Jenkins agents)
+Easier than self-hosting Jenkins
+But you wanted to learn Jenkins, so maybe later
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Option A: Jenkins + Docker agents ← You were thinking this
+
+Jenkins controller somewhere (cloud or laptop)
+Builds run in Docker containers
+You manage Jenkins
+
+Option B: GitHub Actions ← Completely different
+
+No Jenkins at all
+GitHub provides everything
+Easier, but you don't learn Jenkins
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Installing Jenkins on Windows
+Option 1: Native Windows Installation (MSI Installer)
+Download and Install:
+
+Go to <https://www.jenkins.io/download/>
+Download the Windows installer (.msi)
+Run the installer
+Follow the wizard (defaults are usually fine)
+Jenkins will install as a Windows Service
+
+After installation:
+
+Jenkins runs automatically on startup
+Access at <http://localhost:8088>
+Unlock with initial admin password from:
+
+  C:\Program Files\Jenkins\secrets\initialAdminPassword
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+CoinOS/  (your Git repo)
+├── Jenkinsfile
+├── configs/
+│   ├── coinos-base.yaml        # Your custom profiles
+│   ├── coinos-bitcoin.yaml
+│   └── coinos-layout.yaml
+├── overlays/                    # Custom files for your image
+│   ├── etc/
+│   │   └── coinos-config.conf
+│   └── usr/
+│       └── local/
+│           └── bin/
+│               └── coinos-setup.sh
+├── scripts/
+│   └── build.sh                # Your build wrapper
+├── rpi-image-gen/              # Git submodule or just cloned
+└── README.md
+
+```
+**In this approach:**
+- rpi-image-gen is a **tool/dependency** (like a library)
+- Your configs define **what CoinOS is**
+- You don't modify rpi-image-gen itself
+- You can update rpi-image-gen easily
+
+
+### **Option 2: Fork rpi-image-gen**
+
+Fork the repo and add your stuff to it:
+```
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+CoinOS/  (forked from raspberrypi/rpi-image-gen)
+├── build.py                    # Original rpi-image-gen
+├── profiles/
+│   ├── base.yaml              # Original
+│   └── coinos.yaml            # Your addition
+├── Jenkinsfile                # Your addition
+└── ...
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Think of it like:
+
+Yocto/Buildroot = The build system
+Your BSP layer = Your project (CoinOS)
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Create a NEW Git repo called "CoinOS"
+Add rpi-image-gen as a Git submodule (or just clone it in Jenkins)
+Create your configs/ directory with CoinOS-specific profiles
+Add Jenkinsfile that calls rpi-image-gen with your configs
+
+This way:
+
+CoinOS is clearly YOUR project
+rpi-image-gen is a tool you use
+Clean, maintainable, professional structure
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Option 1: GitHub ⭐ Most Popular
+Pros:
+
+Free public/private repos
+Huge community, easy to share later
+GitHub Actions available (if you want to try later)
+Great for portfolio/resume
+Easy webhooks to Jenkins
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+# Create directory structure
+
+mkdir configs overlays scripts output
+
+# Add rpi-image-gen as submodule
+
+git submodule add <https://github.com/raspberrypi/rpi-image-gen.git>
+
+# Create basic config file
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+# Add all files
+
+git add .
+
+# Commit
+
+git commit -m "Initial CoinOS project structure with rpi-image-gen"
+
+# Push to GitHub
+
+git push origin main
