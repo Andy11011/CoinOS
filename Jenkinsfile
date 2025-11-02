@@ -2,7 +2,9 @@ pipeline {
     agent {
         docker {
             image 'ubuntu:22.04'
-            args '-u root:root'
+            args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+            // This tells Docker to use default working directory
+            reuseNode true
         }
     }
     
@@ -27,7 +29,16 @@ pipeline {
         stage('Validate Config') {
             steps {
                 echo 'Validating CoinOS configuration...'
-                sh 'cat configs/coinos-base.yaml'
+                sh '''
+                    pwd
+                    ls -la
+                    if [ -f configs/coinos-base.yaml ]; then
+                        cat configs/coinos-base.yaml
+                    else
+                        echo "Config file not found!"
+                        exit 1
+                    fi
+                '''
             }
         }
         
