@@ -9,34 +9,30 @@ pipeline {
         }
         
         stage('Build') {
-            agent {
-                docker {
-                    image 'ubuntu:22.04'
-                    args '-u root:root -w /workspace'
-                    reuseNode true
-                }
-            }
             steps {
-                echo "Workspace path: ${WORKSPACE}"
-                sh 'pwd && ls -la'
-                
-                echo 'Installing dependencies...'
-                sh '''
-                    apt-get update
-                    apt-get install -y git
-                '''
-                
-                echo 'Initializing rpi-image-gen submodule...'
-                sh '''
-                    git config --global --add safe.directory "*"
-                    git submodule update --init --recursive
-                '''
-                
-                echo 'Validating CoinOS configuration...'
-                sh 'cat configs/coinos-base.yaml'
-                
-                echo 'Building CoinOS image...'
-                sh 'echo "Build command will go here"'
+                script {
+                    def workspace = pwd()
+                    
+                    // Run all commands in a single Docker container
+                    sh """
+                        docker run --rm -u root:root \
+                        -v "${workspace}":/workspace \
+                        -w /workspace \
+                        ubuntu:22.04 \
+                        bash -c '
+                            apt-get update && \
+                            apt-get install -y git && \
+                            git config --global --add safe.directory \"*\" && \
+                            git submodule update --init --recursive && \
+                            echo \"=== Current Directory ===\" && \
+                            pwd && \
+                            echo \"=== Files in Workspace ===\" && \
+                            ls -la && \
+                            echo \"=== Validating CoinOS configuration ===\" && \
+                            cat configs/coinos-base.yaml
+                        '
+                    """
+                }
             }
         }
     }
