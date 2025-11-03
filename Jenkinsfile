@@ -13,8 +13,8 @@ pipeline {
                 bat 'echo "Current directory: %CD%"'
                 bat 'dir'
                                 
-                // Step 1: Start container with Debian 12 (bookworm)
-                bat 'docker run -d --name coinos-build -u root:root -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
+                // Step 1: Start container with privileged mode for binfmt access
+                bat 'docker run -d --name coinos-build --privileged -u root:root -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
 
                 // Step 2: Update and install basic dependencies
                 bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y git curl wget"'
@@ -31,11 +31,11 @@ pipeline {
                 // Step 6: Install rpi-image-gen dependencies
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./install_deps.sh"'
 
-                // Step 7: Load binfmt_misc module for ARM emulation
-                bat 'docker exec coinos-build bash -c "modprobe binfmt_misc || echo \"binfmt_misc module loaded\""'
+                // Step 7: Install QEMU user static for ARM emulation
+                bat 'docker exec coinos-build bash -c "apt-get install -y qemu-user-static binfmt-support"'
 
-                // Step 8: Configure binfmt for ARM
-                bat 'docker exec coinos-build bash -c "update-binfmts --enable qemu-arm || echo \"QEMU ARM enabled\""'
+                // Step 8: Verify binfmt is working
+                bat 'docker exec coinos-build bash -c "ls -la /proc/sys/fs/binfmt_misc/ || echo \\"binfmt_misc check\\""'
 
                 // Step 9: Build using our existing coinos-base.yaml config
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen build -c ../configs/coinos-base.yaml"'
