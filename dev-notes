@@ -533,3 +533,11 @@ bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && cat ../../conf
 //--------------------//
 
 Great progress! The dependencies installed successfully, but there's one issue at the end - the binfmt_misc module needs to be loaded. This is required for running ARM binaries on x86 systems.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+The issue is still the same - the binfmt_misc kernel module needs to be loaded on the Windows host, not inside the Docker container. The error message is clear:Module binfmt_misc not loaded in host
+Please run:
+  sudo modprobe binfmt_misc

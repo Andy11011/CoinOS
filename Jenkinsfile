@@ -13,37 +13,40 @@ pipeline {
                 bat 'echo "Current directory: %CD%"'
                 bat 'dir'
                                 
-                // Step 1: Start container with privileged mode for binfmt access
+                // Step 1: Register QEMU on Docker host (this container will exit after registering)
+                bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes || echo "QEMU registration attempted"'
+                
+                // Step 2: Start build container
                 bat 'docker run -d --name coinos-build --privileged -u root:root -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
 
-                // Step 2: Update and install basic dependencies
+                // Step 3: Update and install basic dependencies
                 bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y git curl wget"'
 
-                // Step 3: Clone rpi-image-gen directly (instead of using submodule)
+                // Step 4: Clone rpi-image-gen directly (instead of using submodule)
                 bat 'docker exec coinos-build bash -c "git clone https://github.com/raspberrypi/rpi-image-gen.git rpi-image-gen || echo \"pi-gen repo cloned\""'
                 
-                // Step 4: Show directory and files
+                // Step 5: Show directory and files
                 bat 'docker exec coinos-build bash -c "pwd && ls -la"'
 
-                // Step 5: Display config file
+                // Step 6: Display config file
                 bat 'docker exec coinos-build bash -c "cat configs/coinos-base.yaml"'
 
-                // Step 6: Install rpi-image-gen dependencies
+                // Step 7: Install rpi-image-gen dependencies
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./install_deps.sh"'
 
-                // Step 7: Install QEMU user static for ARM emulation
+                // Step 8: Install QEMU user static for ARM emulation
                 bat 'docker exec coinos-build bash -c "apt-get install -y qemu-user-static binfmt-support"'
 
-                // Step 8: Verify binfmt is working
+                // Step 9: Verify binfmt is working
                 bat 'docker exec coinos-build bash -c "ls -la /proc/sys/fs/binfmt_misc/ || echo \\"binfmt_misc check\\""'
 
-                // Step 9: Build using our existing coinos-base.yaml config
+                // Step 10: Build using our existing coinos-base.yaml config
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen build -c ../configs/coinos-base.yaml"'
 
-                // Step 10: Copy built image to workspace (so it survives container cleanup)
+                // Step 11: Copy built image to workspace (so it survives container cleanup)
                 bat 'docker exec coinos-build bash -c "cp -r rpi-image-gen/image/ . || echo No image directory found"'
 
-                // Step 11: Check if image was created
+                // Step 12: Check if image was created
                 bat 'docker exec coinos-build bash -c "ls -la image/ || echo No image directory"'
         
                 // Cleanup
