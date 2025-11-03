@@ -24,6 +24,10 @@ pipeline {
 
                 // Step 4: Display config file
                 bat 'docker exec coinos-build bash -c "cat configs/coinos-base.yaml"'
+
+                // Cleanup
+                bat 'docker stop coinos-build'
+                bat 'docker rm coinos-build'
             }   
         }
     }
