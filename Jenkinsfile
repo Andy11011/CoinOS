@@ -13,10 +13,10 @@ pipeline {
                 bat 'echo "Current directory: %CD%"'
                 bat 'dir'
                                 
-                // Step 1: Start container and keep it running
-                bat 'docker run -d --name coinos-build -u root:root -v "%CD%":/workspace -w /workspace ubuntu:22.04 tail -f /dev/null'
+                // Step 1: Start container with Debian 12 (bookworm)
+                bat 'docker run -d --name coinos-build -u root:root -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
 
-                // Step 2: Configure git safe directory
+                // Step 2: Update and install basic dependencies
                 bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y git curl wget"'
 
                 // Step 3: Clone rpi-image-gen directly (instead of using submodule)
@@ -67,6 +67,11 @@ pipeline {
         }
         failure {
             echo 'CoinOS build failed!'
+        }
+        always {
+            // Clean up any remaining containers
+            bat 'docker stop coinos-build || echo "No container to stop"'
+            bat 'docker rm coinos-build || echo "No container to remove"'
         }
     }
 }
