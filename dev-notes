@@ -527,3 +527,9 @@ bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"FIRST_U
 bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"FIRST_USER_PASS=password\" >> config"'
 bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"ENABLE_SSH=1\" >> config"'
 bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && cat ../../configs/coinos-base.yaml | grep \\\"^  - \\\" | sed \\\"s/^  - //\\\" > packages"'
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Great progress! The dependencies installed successfully, but there's one issue at the end - the binfmt_misc module needs to be loaded. This is required for running ARM binaries on x86 systems.

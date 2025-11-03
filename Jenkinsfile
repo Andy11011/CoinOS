@@ -31,16 +31,19 @@ pipeline {
                 // Step 6: Install rpi-image-gen dependencies
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./install_deps.sh"'
 
-                // Step 7: Prepare build environment
-                bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ls -la"'
+                // Step 7: Load binfmt_misc module for ARM emulation
+                bat 'docker exec coinos-build bash -c "modprobe binfmt_misc || echo \"binfmt_misc module loaded\""'
 
-                // Step 8: Build using our existing coinos-base.yaml config
+                // Step 8: Configure binfmt for ARM
+                bat 'docker exec coinos-build bash -c "update-binfmts --enable qemu-arm || echo \"QEMU ARM enabled\""'
+
+                // Step 9: Build using our existing coinos-base.yaml config
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen build -c ../configs/coinos-base.yaml"'
 
-                // Step 9: Copy built image to workspace (so it survives container cleanup)
+                // Step 10: Copy built image to workspace (so it survives container cleanup)
                 bat 'docker exec coinos-build bash -c "cp -r rpi-image-gen/image/ . || echo No image directory found"'
 
-                // Step 10: Check if image was created
+                // Step 11: Check if image was created
                 bat 'docker exec coinos-build bash -c "ls -la image/ || echo No image directory"'
         
                 // Cleanup
