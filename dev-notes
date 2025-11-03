@@ -451,3 +451,26 @@ Path translation fails: Docker can't map Windows C:/ to Linux filesystem
 reuseNode true means: "Use the SAME workspace that was checked out on Windows"
 Jenkins tries to mount C:\ProgramData\Jenkins\... into the Docker container
 Docker says: "I can't work with Windows paths!"
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+CoinOS/  (your Git repo)
+├── Jenkinsfile
+├── configs/
+│   ├── coinos-base.yaml        # Your custom profiles
+│   ├── coinos-bitcoin.yaml
+│   └── coinos-layout.yaml
+├── overlays/                    # Custom files for your image
+│   ├── etc/
+│   │   └── coinos-config.conf
+│   └── usr/
+│       └── local/
+│           └── bin/
+│               └── coinos-setup.sh
+├── scripts/
+│   └── build.sh                # Your build wrapper
+├── rpi-image-gen/              # Git submodule or just cloned
+└── README.md
