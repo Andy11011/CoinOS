@@ -474,3 +474,56 @@ CoinOS/  (your Git repo)
 │   └── build.sh                # Your build wrapper
 ├── rpi-image-gen/              # Git submodule or just cloned
 └── README.md
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+// Step 5: Create custom configuration for CoinOS
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen && mkdir -p config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"IMG_NAME=coinos-base\" > config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"RELEASE=bookworm\" >> config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"FIRST_USER_NAME=coinos\" >> config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"FIRST_USER_PASS=password\" >> config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"ENABLE_SSH=1\" >> config"'
+
+
+// Step 6: Add custom packages from your config
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"# Custom packages for CoinOS\" > packages"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"network-manager\" >> packages"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"openssh-server\" >> packages"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"python3\" >> packages"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"git\" >> packages"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"curl\" >> packages"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"vim\" >> packages"'
+
+
+// Step 7: Build the actual image
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen"'
+
+
+// Step 8: Check if image was created
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ls -la image/*.img || echo No image file found"'
+
+
+// Step 9: Show build logs
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen && tail -n 50 build.log || echo No build log found"'
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+
+// Step 5: Convert coinos-base.yaml to rpi-image-gen config format
+bat 'docker exec coinos-build bash -c "python3 -c \"\nimport yaml\nwith open(\\\"configs/coinos-base.yaml\\\") as f:\n    config = yaml.safe_load(f)\nwith open(\\\"rpi-image-gen/config/config\\\", \\\"w\\\") as f:\n    f.write(\\\"IMG_NAME=\\\" + config[\\\"name\\\"] + \\\"\\\\n\\\")\n    f.write(\\\"RELEASE=\\\" + config[\\\"base\\\"] + \\\"\\\\n\\\")\n    f.write(\\\"FIRST_USER_NAME=coinos\\\\n\\\")\n    f.write(\\\"FIRST_USER_PASS=password\\\\n\\\")\n    f.write(\\\"ENABLE_SSH=1\\\\n\\\")\nwith open(\\\"rpi-image-gen/config/packages\\\", \\\"w\\\") as f:\n    for pkg in config[\\\"packages\\\"]:\n        f.write(pkg + \\\"\\\\n\\\")\n\" || echo \"Python conversion failed, using fallback method\""'
+
+// Step 6: Fallback - manual config if Python fails
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen && mkdir -p config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"IMG_NAME=coinos-base\" > config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"RELEASE=bookworm\" >> config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"FIRST_USER_NAME=coinos\" >> config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"FIRST_USER_PASS=password\" >> config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && echo \"ENABLE_SSH=1\" >> config"'
+bat 'docker exec coinos-build bash -c "cd rpi-image-gen/config && cat ../../configs/coinos-base.yaml | grep \\\"^  - \\\" | sed \\\"s/^  - //\\\" > packages"'
