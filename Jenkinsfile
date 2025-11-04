@@ -14,10 +14,16 @@ pipeline {
                 bat 'dir'
                 
                 // Step 1: Register QEMU on Docker host (this makes ARM emulation available)
-                bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
+                //bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
 
                 // Step 2: Start build container with binfmt_misc mounted
                 bat 'docker run -d --name coinos-build --privileged -u root:root -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
+
+                // Step 2.5: Install QEMU inside the container
+                bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support"'
+
+                // Step 2.6: Verify it worked
+                bat 'docker exec coinos-build bash -c "ls /proc/sys/fs/binfmt_misc/qemu-* || echo \"QEMU not registered\""'
 
                 // Check if binfmt_misc is available and see registered interpreters
                 bat 'docker exec coinos-build bash -c "ls -la /proc/sys/fs/binfmt_misc/"'

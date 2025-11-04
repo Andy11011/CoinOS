@@ -699,3 +699,9 @@ Kernel sees ARM binary
 1. Checks binfmt_misc: "use /usr/bin/qemu-aarch64-static"
 2. Kernel looks for that binary in the Docker VM's filesystem (not in the container)
 3. Finds it and uses it to run the ARM code
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+The QEMU registration failed! The /proc/sys/fs/binfmt_misc/ directory is empty, which means the first container didn't register anything.
