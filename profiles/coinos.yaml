@@ -1,4 +1,4 @@
 ---
 name: coinos
 layers:
-  - /workspace/layers/coinos-base.yaml
+  - layers/coinos-base.yaml

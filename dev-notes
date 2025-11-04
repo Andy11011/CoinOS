@@ -883,3 +883,19 @@ Yes, exactly! That coinos-base.yaml is now a Layer File.
 
 But here's the problem: You can't just pass a layer file directly to rpi-image-gen build -c.
 The -c flag expects a config file (INI format), not a layer file (YAML).
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+C:\ProgramData\Jenkins\.jenkins\workspace\CoinOS-Build>docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen build -c ../config/coinos-config.ini"
+
+==> parameter_assembly
+
+PARAM
+CONFIG ../config/coinos-config.ini
+CFG IGconf_image_profile=profiles/coinos.yaml
+CFG IGconf_image_layout=layouts/sd-card.yaml
+CFG IGconf_image_output=coinos-image.img
+Warning: dpkg-architecture not found: source build support unavailable
+Error: Config provides no layer info
