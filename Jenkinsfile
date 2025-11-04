@@ -43,8 +43,25 @@ pipeline {
                 // Step 5: Show directory and files
                 bat 'docker exec coinos-build bash -c "pwd && ls -la"'
 
-                // Step 6: Display config file
-                bat 'docker exec coinos-build bash -c "cat configs/coinos-base.yaml"'
+                // Step 6: Display and print config-related files
+                bat '''
+                docker exec coinos-build bash -c "
+                for dir in config layers layouts profiles 'scripts'; do
+                    if [ -d \\"$dir\\" ]; then
+                    echo '=========================================================='
+                    echo '📁 Contents of directory:' $dir
+                    echo '----------------------------------------------------------'
+                    ls -R $dir
+                    echo '----------------------------------------------------------'
+                    echo '📜 Printing file contents from:' $dir
+                    echo '----------------------------------------------------------'
+                    find $dir -type f \\( -name '*.yaml' -o -name '*.yml' -o -name '*.sh' -o -name '*.json' -o -name '*.conf' -o -name '*.txt' \\) -print -exec sh -c 'echo --- START {} ---; cat {}; echo --- END {} ---; echo' \\;
+                    else
+                    echo '⚠️ Directory not found:' $dir
+                    fi
+                done
+                "
+                '''
 
                 // Step 7: Install rpi-image-gen dependencies
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./install_deps.sh"'
