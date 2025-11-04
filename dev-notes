@@ -541,3 +541,161 @@ Great progress! The dependencies installed successfully, but there's one issue a
 The issue is still the same - the binfmt_misc kernel module needs to be loaded on the Windows host, not inside the Docker container. The error message is clear:Module binfmt_misc not loaded in host
 Please run:
   sudo modprobe binfmt_misc
+
+
+
+Module binfmt_misc not loaded in host
+Please run:
+  sudo modprobe binfmt_misc
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Step 1: QEMU Registration Explained
+
+bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
+
+This registers QEMU interpreters with the Linux kernel's binfmt_misc system. Think of it like teaching your x86 computer how to run ARM programs.
+
+multiarch/qemu-user-static - A Docker image containing QEMU user-mode emulators for various architectures (ARM, ARM64, RISC-V, etc.)
+
+--privileged - Required because we need to write to /proc/sys/fs/binfmt_misc/ which is a kernel interface
+
+--reset -p yes - Flags for the registration script:
+
+--reset - Clear any existing QEMU registrations first
+-p yes - Make the registration persistent (the QEMU binaries are copied to the host, not just referenced)
+
+
+What happens internally:
+
+
+# The container writes entries like this to /proc/sys/fs/binfmt_misc/register:
+echo ':qemu-aarch64:M::\x7fELF\x02\x01\x01\x00...::/usr/bin/qemu-aarch64-static:' > /proc/sys/fs/binfmt_misc/register
+```
+
+This tells the kernel: "When you see an ARM64 binary (identified by its ELF header magic bytes), don't try to execute it directly - instead run it through `/usr/bin/qemu-aarch64-static`"
+
+**After registration:**
+
+```
+Your x86 Host
+├── Sees ARM binary
+├── Checks binfmt_misc rules
+├── Finds qemu-aarch64 handler
+└── Automatically runs: qemu-aarch64-static /path/to/arm/binary
+
+Why it works across containers:
+
+Because binfmt_misc is a kernel-level feature, once registered on the host, ANY container (or even the host itself) can run ARM binaries transparently. The kernel intercepts the execution and redirects it through QEMU automatically.
+
+
+After this registration, you can literally do this inside any container:
+
+# Download an ARM64 binary
+wget https://example.com/arm64-program
+
+# Run it directly (kernel automatically uses QEMU)
+./arm64-program  # Just works! Even on x86!
+
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+
+binfmt_misc is a Linux kernel feature. On Windows with Docker Desktop:
+
+Docker Desktop runs a Linux VM (WSL2 or Hyper-V)
+That Linux VM has its own kernel
+The QEMU registration happens inside that VM's kernel
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Windows Host (Jenkins)
+    ↓
+Docker Desktop (Linux VM with kernel)
+    ↓
+Step 1: docker run multiarch/qemu-user-static
+        → Registers QEMU in the VM's kernel
+        → Copies QEMU binaries into the VM
+    ↓
+Step 2: docker run debian:bookworm (your build container)
+        → This container runs in the SAME VM
+        → Shares the SAME kernel with binfmt_misc
+        → Can now execute ARM binaries automatically
+    ↓
+Your rpi-image-gen build runs ARM tools
+        → Kernel sees ARM binary
+        → Automatically runs it through QEMU
+        → Works transparently
+
+
+Both containers (the QEMU registration one and your Debian build one) run in the same Linux VM, sharing the same kernel. So the binfmt_misc registration persists.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Simplified explanation:
+
+1. First container registers: "Hey kernel, when you see ARM binaries, use QEMU"
+2. First container exits (with --rm)
+3. Your Debian container starts
+4. When it tries to run ARM code, the kernel (which is still aware of the registration) automatically uses QEMU
+It just works™
+
+The -p yes flag is crucial here - it makes the QEMU binaries persistent in the Docker VM, so they're still available after the registration container exits.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+The /proc/sys/fs/binfmt_misc/ directory is part of the kernel's procfs, and containers share the same kernel as the host (Docker VM), so it should be visible by default.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+/proc/sys/fs/binfmt_misc/
+├── register
+├── status
+├── qemu-aarch64
+├── qemu-arm
+├── qemu-armeb
+├── qemu-riscv64
+└── ... (other architectures)
+
+
+Inside `qemu-aarch64` you'll see something like:
+```
+
+enabled
+interpreter /usr/bin/qemu-aarch64-static
+flags: F
+offset 0
+magic 7f454c460201010000000000000000000200b700
+mask ffffffffffffff00fffffffffffffffffeffff
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+The -p yes flag copies the QEMU binaries to a fixed location in the Docker VM's filesystem (not inside any specific container). The path is typically:
+
+/usr/bin/qemu-aarch64-static
+/usr/bin/qemu-arm-static
+/usr/bin/qemu-riscv64-static
+etc.
+
+Your Debian container doesn't have the binaries inside it by default. However, when the kernel tries to execute an ARM binary:
+
+Kernel sees ARM binary
+
+1. Checks binfmt_misc: "use /usr/bin/qemu-aarch64-static"
+2. Kernel looks for that binary in the Docker VM's filesystem (not in the container)
+3. Finds it and uses it to run the ARM code

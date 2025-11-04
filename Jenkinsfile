@@ -12,12 +12,24 @@ pipeline {
             steps {
                 bat 'echo "Current directory: %CD%"'
                 bat 'dir'
-                                
-                // Step 1: Register QEMU on Docker host (this container will exit after registering)
-                bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes || echo "QEMU registration attempted"'
                 
-                // Step 2: Start build container
+                // Step 1: Register QEMU on Docker host (this makes ARM emulation available)
+                bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
+
+                // Step 2: Start build container with binfmt_misc mounted
                 bat 'docker run -d --name coinos-build --privileged -u root:root -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
+
+                // Check if binfmt_misc is available and see registered interpreters
+                bat 'docker exec coinos-build bash -c "ls -la /proc/sys/fs/binfmt_misc/"'
+
+                // See the QEMU ARM64 registration details
+                bat 'docker exec coinos-build bash -c "cat /proc/sys/fs/binfmt_misc/qemu-aarch64"'
+
+                // See all QEMU registrations
+                bat 'docker exec coinos-build bash -c "ls /proc/sys/fs/binfmt_misc/qemu-* 2>/dev/null || echo No QEMU registrations found"'
+
+                // Run an ARM container and check the architecture
+                bat 'docker run --rm arm64v8/busybox uname -m'
 
                 // Step 3: Update and install basic dependencies
                 bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y git curl wget"'
@@ -34,11 +46,11 @@ pipeline {
                 // Step 7: Install rpi-image-gen dependencies
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./install_deps.sh"'
 
-                // Step 8: Install QEMU user static for ARM emulation
-                bat 'docker exec coinos-build bash -c "apt-get install -y qemu-user-static binfmt-support"'
+                // Step 8: Verify binfmt is working (should see qemu entries)
+                bat 'docker exec coinos-build bash -c "ls -la /proc/sys/fs/binfmt_misc/ && cat /proc/sys/fs/binfmt_misc/qemu-* | head -20 || echo \\"binfmt_misc check\\""'
 
-                // Step 9: Verify binfmt is working
-                bat 'docker exec coinos-build bash -c "ls -la /proc/sys/fs/binfmt_misc/ || echo \\"binfmt_misc check\\""'
+                // Step 9: Test ARM emulation is working
+                bat 'docker exec coinos-build bash -c "dpkg --add-architecture arm64 && apt-get update && apt-get download libc6:arm64 && dpkg -x libc6_*_arm64.deb test && ./test/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1 --version || echo \\"ARM emulation test\\""'
 
                 // Step 10: Build using our existing coinos-base.yaml config
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen build -c ../configs/coinos-base.yaml"'
