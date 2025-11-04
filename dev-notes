@@ -826,3 +826,31 @@ systemctl enable ssh   ← ARM binary
 ✅ Kernel intercepts ARM binary execution
 ✅ Automatically runs through qemu-aarch64-static
 ✅ Everything works transparently
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+There's likely no cross-compilation happening in rpi-image-gen.
+
+It's primarily an image assembly tool, not a compiler. The workflow is:
+
+1. Download pre-compiled ARM .deb packages from Debian/Raspbian repos
+   ↓
+2. Extract them into an ARM rootfs
+   ↓
+3. chroot into the ARM rootfs and run ARM binaries:
+   - apt-get install (ARM)
+   - dpkg configure scripts (ARM)
+   - systemd setup (ARM)
+   - Custom configuration scripts (ARM)
+   ↓
+4. Package everything into a bootable .img file
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+ValueError: Section 'name' in /workspace/configs/coinos-base.yaml must be a mapping
+
+The rpi-image-gen tool expects the config file to have a different structure. Looking at the error, it seems name shouldn't be a top-level key, but rather nested inside a configuration section.

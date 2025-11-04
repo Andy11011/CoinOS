@@ -1,13 +1,22 @@
+---
 name: coinos-base
-description: A lightweight OS for deploying and running algorithmic trading systems.
-base: bookworm
 
-packages:
-  - raspberrypi-kernel
-  - raspberrypi-bootloader
-  - network-manager
-  - openssh-server
-  - python3
-  - git
-  - curl
-  - vim
+mmdebstrap:
+  architectures:
+    - arm64
+  mode: auto
+  variant: custom
+  suite: bookworm
+  mirrors:
+    - deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+    - deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+    - deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+  packages:
+    - raspberrypi-kernel
+    - raspberrypi-bootloader
+    - network-manager
+    - openssh-server
+    - python3
+    - git
+    - curl
+    - vim
