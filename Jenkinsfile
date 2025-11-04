@@ -45,10 +45,10 @@ pipeline {
 
                 // Step 6: Display config files
                 bat '''
-                docker exec coinos-build bash -c "echo ===== config/coinos-config.ini ===== && cat /config/coinos-config.ini || echo File not found"
-                docker exec coinos-build bash -c "echo ===== layers/coinos-base.yaml ===== && cat /layers/coinos-base.yaml || echo File not found"
-                docker exec coinos-build bash -c "echo ===== profiles/coinos.yaml ===== && cat /profiles/coinos.yaml || echo File not found"
-                docker exec coinos-build bash -c "echo ===== layouts/sd-card.yaml ===== && cat /layouts/sd-card.yaml || echo File not found"
+                docker exec coinos-build bash -c "echo ===== config/coinos-config.ini ===== && cat /workspace/config/coinos-config.ini || echo File not found"
+                docker exec coinos-build bash -c "echo ===== layers/coinos-base.yaml ===== && cat /workspace/layers/coinos-base.yaml || echo File not found"
+                docker exec coinos-build bash -c "echo ===== profiles/coinos.yaml ===== && cat /workspace/profiles/coinos.yaml || echo File not found"
+                docker exec coinos-build bash -c "echo ===== layouts/sd-card.yaml ===== && cat /workspace/layouts/sd-card.yaml || echo File not found"
                 '''
 
                 // Step 7: Install rpi-image-gen dependencies
