@@ -22,8 +22,14 @@ pipeline {
                 // Step 2.5: Install QEMU inside the container
                 bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support"'
 
-                // Step 2.6: Verify it worked
-                bat 'docker exec coinos-build bash -c "ls /proc/sys/fs/binfmt_misc/qemu-* || echo \"QEMU not registered\""'
+                // Step 2.6: Manually register QEMU interpreters (since the service didn't start)
+                bat 'docker exec coinos-build bash -c "update-binfmts --enable"'
+
+                // OR use the direct registration script:
+                //bat 'docker exec coinos-build bash -c "/var/lib/dpkg/info/qemu-user-static.postinst configure"'
+
+                // Step 2.7: Verify it worked
+                bat 'docker exec coinos-build bash -c "ls /proc/sys/fs/binfmt_misc/qemu-* && echo \"✓ QEMU registered\" || echo \"✗ QEMU not registered\""'
 
                 // Check if binfmt_misc is available and see registered interpreters
                 bat 'docker exec coinos-build bash -c "ls -la /proc/sys/fs/binfmt_misc/"'

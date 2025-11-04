@@ -705,3 +705,11 @@ Kernel sees ARM binary
 //--------------------//
 
 The QEMU registration failed! The /proc/sys/fs/binfmt_misc/ directory is empty, which means the first container didn't register anything.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+The binfmt-support service didn't start because systemd/init systems don't work normally in containers. We need to manually register the QEMU interpreters.
+
+Try the update-binfmts --enable command first - that should automatically register all installed QEMU interpreters!
