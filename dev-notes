@@ -854,3 +854,32 @@ It's primarily an image assembly tool, not a compiler. The workflow is:
 ValueError: Section 'name' in /workspace/configs/coinos-base.yaml must be a mapping
 
 The rpi-image-gen tool expects the config file to have a different structure. Looking at the error, it seems name shouldn't be a top-level key, but rather nested inside a configuration section.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Layers in rpi-image-gen are NOT like Yocto layers. They're much simpler:A layer is a single YAML file that describes packages to install and operations to perform on the root filesystem LinuxGizmosGitHub. Think of it more like a "recipe" or "building block."
+
+Key concepts:
+
+1. Layer = Single YAML file with metadata (packages + operations)
+2. Profile = A collection of layers grouped together
+3. Config = INI-style file that selects which profile and disk layout to use
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Config File (.ini format)
+    ↓ references
+Profile (collection of layers)
+    ↓ includes
+Multiple Layer Files (YAML)
+    ↓ each defines
+Packages + Operations
+
+Yes, exactly! That coinos-base.yaml is now a Layer File.
+
+But here's the problem: You can't just pass a layer file directly to rpi-image-gen build -c.
+The -c flag expects a config file (INI format), not a layer file (YAML).

@@ -1,0 +1,13 @@
+---
+name: sd-card
+type: disk
+size: 16G
+partitions:
+  - name: boot
+    type: fat32
+    size: 256M
+    mountpoint: /boot
+  - name: root
+    type: ext4
+    size: remaining
+    mountpoint: /

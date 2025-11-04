@@ -49,14 +49,11 @@ pipeline {
                 // Step 7: Install rpi-image-gen dependencies
                 bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./install_deps.sh"'
 
-                // Step 8: Verify binfmt is working (should see qemu entries)
-                bat 'docker exec coinos-build bash -c "ls -la /proc/sys/fs/binfmt_misc/ && cat /proc/sys/fs/binfmt_misc/qemu-* | head -20 || echo \\"binfmt_misc check\\""'
-
                 // Step 9: Test ARM emulation is working
                 bat 'docker exec coinos-build bash -c "dpkg --add-architecture arm64 && apt-get update && apt-get download libc6:arm64 && dpkg -x libc6_*_arm64.deb test && ./test/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1 --version || echo \\"ARM emulation test\\""'
 
                 // Step 10: Build using our existing coinos-base.yaml config
-                bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen build -c ../configs/coinos-base.yaml"'
+                bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen build -c ../config/coinos-config.ini"'
 
                 // Step 11: Copy built image to workspace (so it survives container cleanup)
                 bat 'docker exec coinos-build bash -c "cp -r rpi-image-gen/image/ . || echo No image directory found"'
