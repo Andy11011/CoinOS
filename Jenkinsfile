@@ -43,23 +43,20 @@ pipeline {
                 // Step 5: Show directory and files
                 bat 'docker exec coinos-build bash -c "pwd && ls -la"'
 
-                // Step 6: Display and print config-related files
+                // Step 6: Display config files
                 bat '''
                 docker exec coinos-build bash -c "
-                for dir in config layers layouts profiles 'scripts'; do
-                    if [ -d \\"$dir\\" ]; then
-                    echo '=========================================================='
-                    echo '📁 Contents of directory:' $dir
-                    echo '----------------------------------------------------------'
-                    ls -R $dir
-                    echo '----------------------------------------------------------'
-                    echo '📜 Printing file contents from:' $dir
-                    echo '----------------------------------------------------------'
-                    find $dir -type f \\( -name '*.yaml' -o -name '*.yml' -o -name '*.sh' -o -name '*.json' -o -name '*.conf' -o -name '*.txt' \\) -print -exec sh -c 'echo --- START {} ---; cat {}; echo --- END {} ---; echo' \\;
-                    else
-                    echo '⚠️ Directory not found:' $dir
-                    fi
-                done
+                echo '===== config/coinos-config.ini ====='
+                cat config/coinos-config.ini || echo 'File not found'
+
+                echo '===== layers/coinos-base.yaml ====='
+                cat layers/coinos-base.yaml || echo 'File not found'
+
+                echo '===== profiles/coinos.yaml ====='
+                cat profiles/coinos.yaml || echo 'File not found'
+
+                echo '===== layouts/sd-card.yaml ====='
+                cat layouts/sd-card.yaml || echo 'File not found'
                 "
                 '''
 
