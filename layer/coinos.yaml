@@ -1,5 +1,5 @@
 # METABEGIN
-# X-Env-Layer-Name: coinos-base
+# X-Env-Layer-Name: coinos
 # X-Env-Layer-Category: coinos
 # X-Env-Layer-Desc: Base layer for Coinos node with essential packages
 # X-Env-Layer-Version: 1.0.0
@@ -14,7 +14,6 @@ mmdebstrap:
     - docker-ce
     - docker-ce-cli
     - docker-compose-plugin
-    - docker-buildx-plugin
     - containerd.io
     
     # System utilities
