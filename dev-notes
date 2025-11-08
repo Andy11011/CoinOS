@@ -1261,3 +1261,220 @@ FINAL ENV
 [Pipeline] stage
 [Pipeline] { (Archive Artifacts)
 Stage "Archive Artifacts" skipped due to earlier failure(s)
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+
+The USER environment variable issue comes from how the rpi-image-gen script is written.
+
+
+./rpi-image-gen/rpi-image-gen: line 296: USER: unbound variable
+
+
+This means the script references $USER at line 296, and Bash is configured with set -u (or set -o nounset), which causes the script to exit if it tries to use an undefined variable.
+
+
+The USER environment variable typically contains the username of the current user. In the rpi-image-gen script, it's likely used for:
+
+Setting file ownership in the generated filesystem
+Creating user accounts in the image
+Logging/tracking who ran the build
+Configuring permissions
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+
+C:\ProgramData\Jenkins\.jenkins\workspace\CoinOS-Build>docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml" 
+
+==> parameter_assembly
+
+PARAM
+CONFIG config/coinos-config.yaml
+CFG IGconf_device_layer=rpi3
+CFG IGconf_layer_custom=coinos
+CFG IGconf_image_layer=image-rpios
+CFG IGconf_image_boot_part_size=200%
+CFG IGconf_image_root_part_size=400%
+CFG IGconf_image_name=coinos-image
+CFG IGconf_image_compression=zstd
+Warning: dpkg-architecture not found: source build support unavailable
+
+==> collect_layers
+
+LAYER
+VALIDATE: essential rpi3 coinos image-rpios
+SEARCH: /workspace/layer:/workspace/rpi-image-gen/device:/workspace/rpi-image-gen/image:/workspace/rpi-image-gen/layer
+
+  [SET]  IGconf_artefact_target_name=filesystem (layer: artefact-base)
+  [SET]  IGconf_artefact_version=$(git describe --tags --always --dirty 2>/dev/null || date +%Y-%m-%d) (layer: artefact-base)
+  [SET]  IGconf_artefact_context=chroot-${IGconf_artefact_version} (layer: artefact-base)
+  [SET]  IGconf_sys_apt_get_purge=y (layer: sys-build-base)
+  [SET]  IGconf_sys_apt_keydir= (layer: sys-build-base)
+  [FORCE]  IGconf_sys_apt_cachedir= (layer: sys-build-base)
+  [SET]  IGconf_sys_workroot=$(realpath --canonicalize-missing ./work) (layer: sys-build-base)
+  [SET]  IGconf_target_context=${IGconf_artefact_context} (layer: target-config)
+  [SET]  IGconf_target_dir=${IGconf_sys_workroot}/${IGconf_target_context} (layer: target-config)
+  [SET]  IGconf_target_path=${IGconf_target_dir}/${IGconf_artefact_target_name} (layer: target-config)
+  [SET]  IGconf_locale_default=en_GB.UTF-8 (layer: locale-base)
+  [SET]  IGconf_locale_keyboard_keymap=gb (layer: locale-base)
+  [SET]  IGconf_locale_keyboard_layout=English (UK) (layer: locale-base)
+  [SET]  IGconf_locale_timezone=Europe/London (layer: locale-base)
+  [SET]  IGconf_device_class=pi3 (layer: rpi3)
+  [LAZY]  IGconf_device_variant=none (layer: device-base)
+  [SET]  IGconf_device_hostname=${IGconf_device_class}-$(tr -dc 'a-z' < /dev/urandom | head -c 6) (layer: device-base)
+  [SET]  IGconf_device_user1=pi (layer: device-base)
+  [SET]  IGconf_device_storage_type=sd (layer: rpi3)
+  [SET]  IGconf_device_sector_size=512 (layer: device-base)
+  [SET]  IGconf_device_assetdir=/workspace/rpi-image-gen/device/pi3 (layer: rpi3)
+  [LAZY]  IGconf_device_prebuild=${IGconf_device_assetdir}/pre-build.sh (layer: device-base)
+  [LAZY]  IGconf_device_postbuild=${IGconf_device_assetdir}/post-build.sh (layer: device-base)
+  [LAZY]  IGconf_device_preimage=${IGconf_device_assetdir}/pre-image.sh (layer: device-base)
+  [LAZY]  IGconf_device_postimage=${IGconf_device_assetdir}/post-image.sh (layer: device-base)
+  [SET]  IGconf_sbom_enable=y (layer: sbom-base)
+  [SET]  IGconf_sbom_version=${IGconf_artefact_version} (layer: sbom-base)
+  [SET]  IGconf_sbom_name=${IGconf_artefact_target_name}-${IGconf_sbom_version} (layer: sbom-base)
+  [SET]  IGconf_sbom_filename=${IGconf_sbom_name}.sbom (layer: sbom-base)
+  [SET]  IGconf_sbom_hook=/workspace/rpi-image-gen/layer/sbom/gen.sh (layer: sbom-base)
+  [LAZY]  IGconf_sbom_provider=syft (layer: sbom-base)
+  [LAZY]  IGconf_sbom_syft_config=/workspace/rpi-image-gen/layer/sbom/syft.yaml (layer: sbom-base)
+  [SET]  IGconf_deploy_compression=none (layer: deploy-base)
+  [SET]  IGconf_deploy_dir=${IGconf_sys_workroot}/deploy-${IGconf_artefact_version} (layer: deploy-base)
+  [SET]  IGconf_deploy_hook=/workspace/rpi-image-gen/layer/base/deploy.sh (layer: deploy-base)
+  [SET]  IGconf_image_suffix=img (layer: image-base)
+  [SKIP]  IGconf_image_compression (already set)
+  [FORCE]  IGconf_image_version=${IGconf_artefact_version} (layer: image-base)
+  [SKIP]  IGconf_image_name (already set)
+  [FORCE]  IGconf_image_pmap=clear (layer: image-rpios)
+  [SET]  IGconf_image_outputdir=${IGconf_sys_workroot}/image-${IGconf_image_name} (layer: image-base)
+  [LAZY]  IGconf_image_provider=genimage (layer: image-base)
+  [SET]  IGconf_image_assetdir=/workspace/rpi-image-gen/image/mbr/simple_dual (layer: image-rpios)
+  [LAZY]  IGconf_image_pmapfile=${IGconf_image_pmap:+${IGconf_image_assetdir}/device/provisionmap-${IGconf_image_pmap}.json} (layer: image-base)
+  [LAZY]  IGconf_image_prebuild=${IGconf_image_assetdir}/pre-build.sh (layer: image-base)
+  [LAZY]  IGconf_image_postbuild=${IGconf_image_assetdir}/post-build.sh (layer: image-base)
+  [LAZY]  IGconf_image_preimage=${IGconf_image_assetdir}/pre-image.sh (layer: image-base)
+  [LAZY]  IGconf_image_postimage=${IGconf_image_assetdir}/post-image.sh (layer: image-base)
+  [SET]  IGconf_image_rootfs_type=ext4 (layer: image-rpios)
+  [SKIP]  IGconf_image_boot_part_size (already set)
+  [SKIP]  IGconf_image_root_part_size (already set)
+Environment variables applied successfully
+Environment variables written to: /tmp/tmp.CCYxIf29vB/all-layers.env
+
+✓ Layer 'essential' validation passed
+✓ Layer 'rpi3' validation passed
+✓ Layer 'coinos' validation passed
+✓ Layer 'image-rpios' validation passed
+
+Build order:
+   1. artefact-base                /workspace/rpi-image-gen/layer/base/artefact-base.yaml
+   2. sys-build-base               /workspace/rpi-image-gen/layer/base/sys-build-base.yaml
+   3. target-config                /workspace/rpi-image-gen/layer/base/target-config.yaml
+   4. locale-base                  /workspace/rpi-image-gen/layer/base/locale-base.yaml
+   5. essential                    /workspace/rpi-image-gen/layer/base/core-essential.yaml
+   6. device-base                  /workspace/rpi-image-gen/layer/base/device-base.yaml
+   7. rpi-boot-firmware            /workspace/rpi-image-gen/layer/rpi/device/boot-firmware.yaml
+   8. rpi-linux-v8                 /workspace/rpi-image-gen/layer/rpi/device/arm64/linux-image-v8.yaml
+   9. rpi-generic64                /workspace/rpi-image-gen/layer/rpi/device/family-generic64.yaml
+  10. rpi3                         /workspace/rpi-image-gen/device/pi3/device.yaml
+  11. debian-bookworm-arm64-multi  /workspace/rpi-image-gen/layer/debian/bookworm/arm64/base-apt-multi.yaml
+  12. rpi-debian-bookworm          /workspace/rpi-image-gen/layer/rpi/debian/bookworm/apt.yaml
+  13. rpi-essential-base           /workspace/rpi-image-gen/layer/rpi/essential.yaml
+  14. coinos                       /workspace/layer/coinos.yaml
+  15. sbom-base                    /workspace/rpi-image-gen/layer/sbom/sbom.yaml
+  16. deploy-base                  /workspace/rpi-image-gen/layer/base/deploy-base.yaml
+  17. image-base                   /workspace/rpi-image-gen/layer/base/image-base.yaml
+  18. image-rpios                  /workspace/rpi-image-gen/image/mbr/simple_dual/image.yaml
+Build order written to: /tmp/tmp.CCYxIf29vB/layers.order
+
+==> prepare_build_config
+
+PREPARE
+FINAL ENV
+-> IGconf_device_layer : rpi3
+-> IGconf_layer_custom : coinos
+-> IGconf_image_layer : image-rpios
+-> IGconf_image_boot_part_size : 200%
+-> IGconf_image_root_part_size : 400%
+-> IGconf_image_name : coinos-image
+-> IGconf_image_compression : zstd
+-> LAYER_HOOKS : /workspace/rpi-image-gen/layer-hooks
+-> RPI_TEMPLATES : /workspace/rpi-image-gen/templates/rpi
+-> IGconf_artefact_target_name : filesystem
+-> IGconf_artefact_version : a210584-dirty
+-> IGconf_artefact_context : chroot-a210584-dirty
+-> IGconf_sys_apt_get_purge : y
+-> IGconf_sys_apt_keydir : 
+-> IGconf_sys_apt_cachedir : 
+-> IGconf_sys_workroot : /workspace/work
+-> IGconf_target_context : chroot-a210584-dirty
+-> IGconf_target_dir : /workspace/work/chroot-a210584-dirty
+-> IGconf_target_path : /workspace/work/chroot-a210584-dirty/filesystem
+-> IGconf_locale_default : en_GB.UTF-8
+-> IGconf_locale_keyboard_keymap : gb
+-> IGconf_locale_keyboard_layout : English (UK)
+-> IGconf_locale_timezone : Europe/London
+-> IGconf_device_class : pi3
+-> IGconf_device_variant : none
+-> IGconf_device_hostname : pi3-nxfdry
+-> IGconf_device_user1 : pi
+-> IGconf_device_storage_type : sd
+-> IGconf_device_sector_size : 512
+-> IGconf_device_assetdir : /workspace/rpi-image-gen/device/pi3
+-> IGconf_device_prebuild : /workspace/rpi-image-gen/device/pi3/pre-build.sh
+-> IGconf_device_postbuild : /workspace/rpi-image-gen/device/pi3/post-build.sh
+-> IGconf_device_preimage : /workspace/rpi-image-gen/device/pi3/pre-image.sh
+-> IGconf_device_postimage : /workspace/rpi-image-gen/device/pi3/post-image.sh
+-> IGconf_sbom_enable : y
+-> IGconf_sbom_version : a210584-dirty
+-> IGconf_sbom_name : filesystem-a210584-dirty
+-> IGconf_sbom_filename : filesystem-a210584-dirty.sbom
+-> IGconf_sbom_hook : /workspace/rpi-image-gen/layer/sbom/gen.sh
+-> IGconf_sbom_provider : syft
+-> IGconf_sbom_syft_config : /workspace/rpi-image-gen/layer/sbom/syft.yaml
+-> IGconf_deploy_compression : none
+-> IGconf_deploy_dir : /workspace/work/deploy-a210584-dirty
+-> IGconf_deploy_hook : /workspace/rpi-image-gen/layer/base/deploy.sh
+-> IGconf_image_suffix : img
+-> IGconf_image_version : a210584-dirty
+-> IGconf_image_pmap : clear
+-> IGconf_image_outputdir : /workspace/work/image-coinos-image
+-> IGconf_image_provider : genimage
+-> IGconf_image_assetdir : /workspace/rpi-image-gen/image/mbr/simple_dual
+-> IGconf_image_pmapfile : /workspace/rpi-image-gen/image/mbr/simple_dual/device/provisionmap-clear.json
+-> IGconf_image_prebuild : /workspace/rpi-image-gen/image/mbr/simple_dual/pre-build.sh
+-> IGconf_image_postbuild : /workspace/rpi-image-gen/image/mbr/simple_dual/post-build.sh
+-> IGconf_image_preimage : /workspace/rpi-image-gen/image/mbr/simple_dual/pre-image.sh
+-> IGconf_image_postimage : /workspace/rpi-image-gen/image/mbr/simple_dual/post-image.sh
+-> IGconf_image_rootfs_type : ext4
+
+MMDEBSTRAP
+Loaded rpi-boot-firmware
+Loaded rpi-linux-v8
+Loaded rpi-generic64
+Loaded debian-bookworm-arm64-multi
+Loaded rpi-debian-bookworm
+Loaded rpi-essential-base
+Loaded coinos
+Loaded 7/18, skipped 11
+
+READY
+
+==> generate_filesystem
+
+FILESYSTEM
+Error: please use unshare with rootless
+Error: [-C /workspace podman unshare bdebstrap --force --env PATH=/workspace/work/host/bin:/workspace/rpi-image-gen/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env IGTOP=/workspace/rpi-image-gen --env SRC_DIR=/workspace --name coinos-image --hostname pi3-nxfdry --output /workspace/work/chroot-a210584-dirty --target /workspace/work/chroot-a210584-dirty/filesystem --env IGconf_device_layer=rpi3 --env IGconf_layer_custom=coinos --env IGconf_image_layer=image-rpios --env IGconf_image_boot_part_size=200% --env IGconf_image_root_part_size=400% --env IGconf_image_name=coinos-image --env IGconf_image_compression=zstd --env LAYER_HOOKS=/workspace/rpi-image-gen/layer-hooks --env RPI_TEMPLATES=/workspace/rpi-image-gen/templates/rpi --env IGconf_artefact_target_name=filesystem --env IGconf_artefact_version=a210584-dirty --env IGconf_artefact_context=chroot-a210584-dirty --aptopt APT::Get::Purge true --env IGconf_sys_apt_get_purge=y --aptopt Dir::Etc::TrustedParts /workspace/work/keys --env IGconf_sys_apt_keydir=/workspace/work/keys --env IGconf_sys_apt_cachedir= --env IGconf_sys_workroot=/workspace/work --env IGconf_target_context=chroot-a210584-dirty --env IGconf_target_dir=/workspace/work/chroot-a210584-dirty --env IGconf_target_path=/workspace/work/chroot-a210584-dirty/filesystem --env IGconf_locale_default=en_GB.UTF-8 --env IGconf_locale_keyboard_keymap=gb --env IGconf_locale_keyboard_layout=English (UK) --env IGconf_locale_timezone=Europe/London --env IGconf_device_class=pi3 --env IGconf_device_variant=none --env IGconf_device_hostname=pi3-nxfdry --env IGconf_device_user1=pi --env IGconf_device_storage_type=sd --env IGconf_device_sector_size=512 --env IGconf_device_assetdir=/workspace/rpi-image-gen/device/pi3 --env IGconf_device_prebuild=/workspace/rpi-image-gen/device/pi3/pre-build.sh --env IGconf_device_postbuild=/workspace/rpi-image-gen/device/pi3/post-build.sh --env IGconf_device_preimage=/workspace/rpi-image-gen/device/pi3/pre-image.sh --env IGconf_device_postimage=/workspace/rpi-image-gen/device/pi3/post-image.sh --env IGconf_sbom_enable=y --env IGconf_sbom_version=a210584-dirty --env IGconf_sbom_name=filesystem-a210584-dirty --env IGconf_sbom_filename=filesystem-a210584-dirty.sbom --env IGconf_sbom_hook=/workspace/rpi-image-gen/layer/sbom/gen.sh --env IGconf_sbom_provider=syft --env IGconf_sbom_syft_config=/workspace/rpi-image-gen/layer/sbom/syft.yaml --env IGconf_deploy_compression=none --env IGconf_deploy_dir=/workspace/work/deploy-a210584-dirty --env IGconf_deploy_hook=/workspace/rpi-image-gen/layer/base/deploy.sh --env IGconf_image_suffix=img --env IGconf_image_version=a210584-dirty --env IGconf_image_pmap=clear --env IGconf_image_outputdir=/workspace/work/image-coinos-image --env IGconf_image_provider=genimage --env IGconf_image_assetdir=/workspace/rpi-image-gen/image/mbr/simple_dual --env IGconf_image_pmapfile=/workspace/rpi-image-gen/image/mbr/simple_dual/device/provisionmap-clear.json --env IGconf_image_prebuild=/workspace/rpi-image-gen/image/mbr/simple_dual/pre-build.sh --env IGconf_image_postbuild=/workspace/rpi-image-gen/image/mbr/simple_dual/post-build.sh --env IGconf_image_preimage=/workspace/rpi-image-gen/image/mbr/simple_dual/pre-image.sh --env IGconf_image_postimage=/workspace/rpi-image-gen/image/mbr/simple_dual/post-image.sh --env IGconf_image_rootfs_type=ext4 --config /workspace/rpi-image-gen/layer/rpi/device/boot-firmware.yaml --config /workspace/rpi-image-gen/layer/rpi/device/arm64/linux-image-v8.yaml --config /workspace/rpi-image-gen/layer/rpi/device/family-generic64.yaml --config /workspace/rpi-image-gen/layer/debian/bookworm/arm64/base-apt-multi.yaml --config /workspace/rpi-image-gen/layer/rpi/debian/bookworm/apt.yaml --config /workspace/rpi-image-gen/layer/rpi/essential.yaml --config /workspace/layer/coinos.yaml --setup-hook ${IGTOP}/bin/runner setup "$@" --essential-hook ${IGTOP}/bin/runner essential "$@" --customize-hook ${IGTOP}/bin/runner customize "$@" --cleanup-hook ${IGTOP}/bin/runner cleanup "$@"] (125)
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Error: please use unshare with rootless
+This is a podman rootless mode issue. The script is trying to use podman unshare but it's running as root in a privileged container, which causes a conflict.
+
+This tells bdebstrap/podman that it's okay to run as root and skip the unshare wrapper, which is only needed for rootless containers.
