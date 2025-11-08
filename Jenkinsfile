@@ -17,7 +17,7 @@ pipeline {
                 //bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
 
                 // Step 2: Start build container with binfmt_misc mounted
-                bat 'docker run -d --name coinos-build --privileged -u root:root -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
+                bat 'docker run -d --name coinos-build --privileged -u root:root -e USER=root -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
 
                 // Step 2.5: Install QEMU inside the container
                 bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support"'
@@ -45,10 +45,8 @@ pipeline {
 
                 // Step 6: Display config files
                 bat '''
-                docker exec coinos-build bash -c "echo ===== config/coinos-config.ini ===== && cat /workspace/config/coinos-config.ini || echo File not found"
-                docker exec coinos-build bash -c "echo ===== layers/coinos-base.yaml ===== && cat /workspace/layers/coinos-base.yaml || echo File not found"
-                docker exec coinos-build bash -c "echo ===== profiles/coinos.yaml ===== && cat /workspace/profiles/coinos.yaml || echo File not found"
-                docker exec coinos-build bash -c "echo ===== layouts/sd-card.yaml ===== && cat /workspace/layouts/sd-card.yaml || echo File not found"
+                docker exec coinos-build bash -c "echo ===== config/coinos-config.ini ===== && cat /workspace/config/coinos-config.yaml || echo File not found"
+                docker exec coinos-build bash -c "echo ===== layers/coinos-base.yaml ===== && cat /workspace/layer/coinos-base.yaml || echo File not found"
                 '''
 
                 // Step 7: Install rpi-image-gen dependencies
