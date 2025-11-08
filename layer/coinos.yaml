@@ -1,0 +1,41 @@
+# METABEGIN
+# X-Env-Layer-Name: coinos-base
+# X-Env-Layer-Category: coinos
+# X-Env-Layer-Desc: Base layer for Coinos node with essential packages
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: debian-bookworm-arm64-multi,rpi-debian-bookworm,rpi-essential-base
+# METAEND
+---
+mmdebstrap:
+  setup-hooks:
+    - echo "Setting up Coinos base layer"
+  packages:
+    # Docker
+    - docker-ce
+    - docker-ce-cli
+    - docker-compose-plugin
+    - docker-buildx-plugin
+    - containerd.io
+    
+    # System utilities
+    - htop
+    - tmux
+    - tree
+    - tcpdump
+    
+    # Network tools
+    - dnsutils
+    - netcat-openbsd
+    
+    # Python
+    - python3
+    - python3-pip
+    - python3-venv
+    
+    # Editor
+    - nano
+    
+    # Other essentials
+    - openssh-server
+    - curl
+    - wget

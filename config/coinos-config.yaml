@@ -1,0 +1,12 @@
+device:
+  layer: rpi3  # rpi4, rpi3
+
+layer:
+  custom: coinos
+
+image:
+  layer: image-rpios-lite  # No desktop - just CLI
+  boot_part_size: 200%
+  root_part_size: 400%
+  name: coinos-image
+  compression: zstd  # none, gzip, xz, zstd

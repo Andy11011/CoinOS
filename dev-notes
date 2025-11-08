@@ -888,14 +888,167 @@ The -c flag expects a config file (INI format), not a layer file (YAML).
 //--------------------//
 //--------------------//
 
-C:\ProgramData\Jenkins\.jenkins\workspace\CoinOS-Build>docker exec coinos-build bash -c "cd rpi-image-gen && ./rpi-image-gen build -c ../config/coinos-config.ini"
+C:\ProgramData\Jenkins\.jenkins\workspace\CoinOS-Build>docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen build -c config/coinos-config.ini"
 
 ==> parameter_assembly
 
 PARAM
-CONFIG ../config/coinos-config.ini
+CONFIG config/coinos-config.ini
 CFG IGconf_image_profile=profiles/coinos.yaml
 CFG IGconf_image_layout=layouts/sd-card.yaml
 CFG IGconf_image_output=coinos-image.img
 Warning: dpkg-architecture not found: source build support unavailable
 Error: Config provides no layer info
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+1. Added device section - specifies the Raspberry Pi model (change rpi5 to your target: rpi4, rpi3, etc.)
+2. Changed profile to layer: custom - the custom layer name (assumes you have a layers/coinos/ directory)
+3. Restructured image section - now includes the base image layer and partition sizing
+4. Removed direct file references - the new format uses layer names instead of direct paths to profiles/layouts
+5. Added partition sizing - boot_part_size and root_part_size (adjust percentages as needed)
+6. Changed compression format - uses zstd instead of specifying output filename directly
+
+A layers/coinos/ directory with your customizations
+The appropriate device layer for your Raspberry Pi model
+Base image layer configured (usually image-rpios)
+
+andy9@raspberrypi:~ $ cat /proc/device-tree/model
+Raspberry Pi 3 Model B Rev 1.2
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+boot_part_size: 200%
+
+The boot partition will be 200% of its minimum required size
+If the boot partition needs at least 100MB for all boot files, it will be created as 200MB (2x the minimum)
+Gives extra space for future kernel updates, firmware, etc.
+
+root_part_size: 300%
+
+The root partition will be 300% of its minimum required size
+If your root filesystem needs at least 2GB, it will be created as 6GB (3x the minimum)
+Provides extra space for system updates, logs, applications, and data
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+image-rpios means:
+
+Use Raspberry Pi OS (the official Debian-based OS for Raspberry Pi) as the base
+This layer provides the core OS files, kernel, drivers, and basic system setup
+
+image-rpios-lite - Raspberry Pi OS Lite (minimal, no desktop environment)
+image-rpios-full - Raspberry Pi OS with full desktop and recommended software
+image-ubuntu - Ubuntu for Raspberry Pi (if supported by the tool)
+Custom base layers you define
+
+The base layer (image-rpios) provides the foundation OS
+Your custom layer (coinos) adds your specific configurations, packages, and customizations on top
+The device layer (rpi3) ensures hardware-specific compatibility
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+✅ No desktop environment (X11, window manager, GUI apps)
+✅ Much smaller image size (typically ~500MB vs 2-3GB)
+✅ Less RAM usage
+✅ Faster boot times
+✅ Lower CPU usage
+✅ More disk space available for your Coinos data
+✅ Fewer security vulnerabilities
+✅ Perfect for headless server/node applications
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+1. Added METABEGIN/METAEND block - Required metadata header with:
+Layer name, category, description, version
+X-Env-Layer-Requires - Dependencies on other layers that handle the base system
+2. Removed architecture/suite/mirrors - These are handled by the required base layers (debian-bookworm-arm64-multi, rpi-debian-bookworm)
+3. Removed kernel/bootloader packages - The rpi-debian-bookworm layer handles Raspberry Pi-specific packages
+4. Kept only your application packages - Just the tools needed for Coinos
+5. Added setup-hooks - For logging during build (optional but good practice)
+
+The layer dependencies (X-Env-Layer-Requires) pull in the base system configuration, so your layer only needs to add Coinos-specific packages on top.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+apt-mark showmanual > manually-installed.txt
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+packages:
+    # Docker (you installed this)
+    - docker-ce
+    - docker-ce-cli
+    - docker-compose-plugin
+    - docker-buildx-plugin
+    - containerd.io
+
+    # Development/debugging tools (if you use them)
+    - build-essential
+    - git
+    - gdb
+    - strace
+    
+    # System utilities (if you use them)
+    - htop
+    - tmux
+    - tree
+    - ncdu
+    - tcpdump
+    - rsync
+    
+    # Network tools (if you need them)
+    - network-manager
+    - dnsutils
+    - netcat-openbsd
+    
+    # Python (if Coinos needs it)
+    - python3
+    - python3-pip
+    - python3-venv
+    
+    # Editor
+    - vim
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+docker-ce - Docker Engine (the main Docker daemon)
+docker-ce-cli - Docker command-line interface (docker commands)
+docker-compose-plugin - Docker Compose for multi-container apps
+docker-buildx-plugin - Advanced build features (you're right, not needed if you're just pulling/running images)
+containerd.io - REQUIRED - The low-level container runtime that actually manages container lifecycle
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+config file - references the layer and specifies image settings
+layer file - contains the package list and configuration
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+-S flag specifies the search path for layers - it tells rpi-image-gen where to find your custom layer files.
+
+rpi-image-gen build -S ./examples/custom_layers/ -c acme-integration.yaml
+
+```
+- `-S ./examples/custom_layers/` - search for layers in this directory
+- `-c acme-integration.yaml` - use this config file

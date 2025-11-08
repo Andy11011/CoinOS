@@ -1,4 +1,0 @@
----
-name: coinos
-layers:
-  - layers/coinos-base.yaml
