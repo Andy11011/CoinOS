@@ -5,7 +5,7 @@ layer:
   custom: coinos
 
 image:
-  layer: image-rpios-lite  # No desktop - just CLI
+  layer: image-rpios
   boot_part_size: 200%
   root_part_size: 400%
   name: coinos-image

@@ -1110,3 +1110,23 @@ SEARCH: /workspace/layer:/workspace/rpi-image-gen/device:/workspace/rpi-image-ge
 
 ✗ Layer 'image-rpios-lite' not found
 Error: [IGconf_device_layer=rpi3 IGconf_layer_custom=coinos IGconf_image_layer=image-rpios-lite IGconf_image_boot_part_size=200% IGconf_image_root_part_size=400% IGconf_image_name=coinos-image IGconf_image_compression=zstd LAYER_HOOKS=/workspace/rpi-image-gen/layer-hooks RPI_TEMPLATES=/workspace/rpi-image-gen/templates/rpi ig layer --path /workspace/layer:/workspace/rpi-image-gen/device:/workspace/rpi-image-gen/image:/workspace/rpi-image-gen/layer --apply-env essential rpi3 coinos image-rpios-lite --write-out /tmp/tmp.9V6moQ3tfZ/all-layers.env] (1)
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+image-rpios is just the image layout structure - it defines:
+
+MBR partition table
+vfat boot partition
+ext4 root partition
+
+It does NOT specify what software packages are installed.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+The layers you include determine the packages
+Your coinos layer only includes: Docker, htop, tmux, Python, nano, SSH, etc. - NO desktop packages
+Since you're not including any desktop-related layers (like LXDE, GNOME, X11, etc.), you won't get a desktop
