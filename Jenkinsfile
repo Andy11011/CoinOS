@@ -57,6 +57,9 @@ pipeline {
                 // Step 9: Test ARM emulation is working
                 bat 'docker exec coinos-build bash -c "dpkg --add-architecture arm64 && apt-get update && apt-get download libc6:arm64 && dpkg -x libc6_*_arm64.deb test && ./test/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1 --version || echo \\"ARM emulation test\\""'
 
+                // List available layers
+                bat 'docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen layer --list"'
+
                 // Step 10: Build using our config with layer search path
                 bat 'docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml"'
 

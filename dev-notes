@@ -1082,3 +1082,31 @@ SEARCH: /workspace/layer:/workspace/rpi-image-gen/device:/workspace/rpi-image-ge
 
 ✗ Layer 'coinos' not found
 Error: [IGconf_device_layer=rpi3 IGconf_layer_custom=coinos IGconf_image_layer=image-rpios-lite IGconf_image_boot_part_size=200% IGconf_image_root_part_size=400% IGconf_image_name=coinos-image IGconf_image_compression=zstd LAYER_HOOKS=/workspace/rpi-image-gen/layer-hooks RPI_TEMPLATES=/workspace/rpi-image-gen/templates/rpi ig layer --path /workspace/layer:/workspace/rpi-image-gen/device:/workspace/rpi-image-gen/image:/workspace/rpi-image-gen/layer --apply-env essential rpi3 coinos image-rpios-lite --write-out /tmp/tmp.BR9AUZP99y/all-layers.env] (1)
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+C:\ProgramData\Jenkins\.jenkins\workspace\CoinOS-Build>docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml" 
+
+==> parameter_assembly
+
+PARAM
+CONFIG config/coinos-config.yaml
+CFG IGconf_device_layer=rpi3
+CFG IGconf_layer_custom=coinos
+CFG IGconf_image_layer=image-rpios-lite
+CFG IGconf_image_boot_part_size=200%
+CFG IGconf_image_root_part_size=400%
+CFG IGconf_image_name=coinos-image
+CFG IGconf_image_compression=zstd
+Warning: dpkg-architecture not found: source build support unavailable
+
+==> collect_layers
+
+LAYER
+VALIDATE: essential rpi3 coinos image-rpios-lite
+SEARCH: /workspace/layer:/workspace/rpi-image-gen/device:/workspace/rpi-image-gen/image:/workspace/rpi-image-gen/layer
+
+✗ Layer 'image-rpios-lite' not found
+Error: [IGconf_device_layer=rpi3 IGconf_layer_custom=coinos IGconf_image_layer=image-rpios-lite IGconf_image_boot_part_size=200% IGconf_image_root_part_size=400% IGconf_image_name=coinos-image IGconf_image_compression=zstd LAYER_HOOKS=/workspace/rpi-image-gen/layer-hooks RPI_TEMPLATES=/workspace/rpi-image-gen/templates/rpi ig layer --path /workspace/layer:/workspace/rpi-image-gen/device:/workspace/rpi-image-gen/image:/workspace/rpi-image-gen/layer --apply-env essential rpi3 coinos image-rpios-lite --write-out /tmp/tmp.9V6moQ3tfZ/all-layers.env] (1)
