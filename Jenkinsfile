@@ -59,7 +59,7 @@ pipeline {
                 bat 'docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen layer --list"'
 
                 // Step 10: Build using our config with layer search path
-                bat 'docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml"'
+                bat 'docker exec coinos-build bash -c "export BDEBSTRAP_FORCE_ROOT=1 && cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml"'
 
                 // Step 11: Copy built image to workspace (so it survives container cleanup)
                 bat 'docker exec coinos-build bash -c "cp -r rpi-image-gen/image/ . || echo No image directory found"'

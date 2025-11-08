@@ -1478,3 +1478,6 @@ Error: please use unshare with rootless
 This is a podman rootless mode issue. The script is trying to use podman unshare but it's running as root in a privileged container, which causes a conflict.
 
 This tells bdebstrap/podman that it's okay to run as root and skip the unshare wrapper, which is only needed for rootless containers.
+
+
+The -e BDEBSTRAP_FORCE_ROOT=1 when starting the container sets it as a container-wide environment variable, but it seems the build script needs it explicitly exported in the shell session where the build command runs.
