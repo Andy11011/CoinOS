@@ -20,7 +20,7 @@ pipeline {
                 bat 'docker run -d --name coinos-build --privileged -u 1000:1000 -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
 
                 // Step 2.5: Install QEMU inside the container
-                bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support"'
+                bat 'docker exec -u root coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support"'
 
                 // Step 2.6: Manually register QEMU interpreters (since the service didn't start)
                 bat 'docker exec coinos-build bash -c "update-binfmts --enable"'
