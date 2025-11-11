@@ -50,7 +50,7 @@ pipeline {
                 '''
 
                 // Step 7: Install rpi-image-gen dependencies
-                bat 'docker exec coinos-build bash -c "cd rpi-image-gen && ./install_deps.sh"'
+                bat 'docker exec -u root coinos-build bash -c "cd rpi-image-gen && ./install_deps.sh"'
 
                 // Step 9: Test ARM emulation is working
                 bat 'docker exec coinos-build bash -c "dpkg --add-architecture arm64 && apt-get update && apt-get download libc6:arm64 && dpkg -x libc6_*_arm64.deb test && ./test/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1 --version || echo \\"ARM emulation test\\""'
