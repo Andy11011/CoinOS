@@ -1481,3 +1481,333 @@ This tells bdebstrap/podman that it's okay to run as root and skip the unshare w
 
 
 The -e BDEBSTRAP_FORCE_ROOT=1 when starting the container sets it as a container-wide environment variable, but it seems the build script needs it explicitly exported in the shell session where the build command runs.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Looking at the script, run is not a standard bash command - it's a custom helper function that's defined in one of the sourced library files.
+
+# Load helpers
+source "$IGTOP/lib/cli.sh"
+source "$IGTOP/lib/common.sh"
+source "$IGTOP/lib/dependencies.sh"
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+podman unshare runs a command in a modified user namespace where:
+- Your regular user ID is mapped to root (UID 0) inside the namespace
+- This allows you to perform root-like operations (like chown, chmod, creating device nodes) without actually being root
+- It's using Linux user namespaces for privilege separation
+
+
+The documentation explicitly states:
+The tool runs as a regular user and does not require root privileges.
+This is achieved through podman unshare. Look at how it's used in the script:
+
+1. Building the filesystem:
+rund "${ctx[SRC_DIR]}" podman unshare bdebstrap ...
+Runs bdebstrap (which constructs filesystems) with elevated namespace privileges
+
+2. Copying overlay files:
+
+run podman unshare rsync -a -- "${src}/" "${IGconf_target_path}/"
+
+Preserves ownership/permissions when copying to the target filesystem
+
+3. Running genimage:
+
+podman unshare env genimage ...
+
+Creates disk images that need proper ownership
+
+
+4. Cleaning up:
+
+run podman unshare rm -rf -- "$val"
+
+Removes files that may have root ownership (within the namespace)
+
+
+Without podman unshare, you'd need actual root privileges (via sudo) to perform these filesystem operations correctly.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+When building a Linux filesystem/image, you need to create files with specific ownership - not everything should be owned by your regular user. For example:
+
+/etc/passwd should be owned by root:root (UID 0, GID 0)
+/root/.bashrc should be owned by root:root
+System binaries in /usr/bin/ should be owned by root:root
+Device files like /dev/null need special permissions and ownership
+
+In Linux, only root can change file ownership (chown) to arbitrary users. A regular user can't create a file and say "this should be owned by UID 0 (root)" or "this should be owned by UID 1000 (another user)".
+
+
+When building a Raspberry Pi OS image, the tools need to:
+
+1. Create files owned by root - system configuration files, binaries
+2. Create files owned by other users - if the image has pre-configured user accounts
+3. Set special permissions - setuid bits, device nodes
+4. Create device files - /dev/null, /dev/zero, etc.
+5. Modify filesystem attributes - that regular users can't touch
+
+The Traditional Solution: sudo
+Traditionally, you'd run the entire build process as root:
+
+sudo ./build-image.sh
+
+But this is dangerous because the entire build script runs with full system privileges.
+
+
+The Modern Solution: podman unshare
+
+podman unshare uses Linux user namespaces to create a "fake root" environment:
+Inside the namespace: Your user appears as UID 0 (root) and can do root-like operations
+Outside the namespace: You're still your regular user
+File ownership mapping: When you create a file as "root" inside the namespace, it's actually owned by your regular user outside the namespace (through subuid/subgid mapping)
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Types of Linux Namespaces
+1. PID Namespace (Process IDs)
+- Processes inside see their own PID tree starting from PID 1
+- Can't see processes outside the namespace
+- Docker containers use this so each container thinks it's the only thing running
+
+2. Network Namespace
+- Complete isolation of network interfaces, routing tables, firewall rules
+- Each namespace has its own localhost, IP addresses, ports
+- Containers get their own network stack
+
+3. Mount Namespace (Like chroot but better)
+- Isolates the filesystem view
+- Each namespace can have different mount points
+- chroot is an older, simpler version - mount namespaces are more powerful and secure
+
+4. User Namespace
+- Maps UIDs/GIDs between inside and outside the namespace
+- Your UID 1000 outside can be UID 0 (root) inside
+- This is the magic that lets regular users act like root safely
+
+5. UTS Namespace (Hostname)
+- Isolates hostname and domain name
+- Each namespace can have its own hostname
+
+6. IPC Namespace (Inter-Process Communication)
+- Isolates System V IPC, POSIX message queues
+- Processes can't communicate across namespace boundaries
+
+7. Cgroup Namespace
+- Isolates the view of control groups (resource limits)
+
+8. Time Namespace (newer, Linux 5.6+)
+- Can have different system clocks in different namespaces
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+Containers = Linux Namespaces + cgroups + layered filesystems
+
+When you run a Docker/Podman container, it typically creates:
+
+# All these namespaces combined:
+PID namespace    → Container sees only its processes
+Network namespace → Container has its own network stack  
+Mount namespace  → Container has its own filesystem view
+User namespace   → (Optional) UID/GID mapping
+UTS namespace    → Container has its own hostname
+IPC namespace    → Isolated IPC
+Cgroup namespace → Isolated resource view
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+podman unshare creates only a User namespace (and Mount namespace):
+
+# What happens:
+podman unshare bash
+
+# Inside this shell:
+id  # Shows UID 0 (root)!
+
+# But outside the namespace, you're still your regular user
+# Files you create as "root" are actually owned by your real UID
+
+
+chroot (older, simpler):
+
+Only changes the root directory
+Doesn't isolate anything else
+Easily escapable if you have privileges
+Can't make you "root"
+
+Mount namespace (modern):
+
+Complete filesystem isolation
+Integrated with other namespaces
+More secure
+Can't be easily escaped
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+unshare is a general-purpose command for creating new namespaces - not just mount namespaces, but any type of Linux namespace.
+
+
+unshare --mount      # Create new mount namespace
+unshare --uts        # Create new UTS namespace (hostname)
+unshare --ipc        # Create new IPC namespace
+unshare --net        # Create new network namespace
+unshare --pid        # Create new PID namespace
+unshare --user       # Create new user namespace
+unshare --cgroup     # Create new cgroup namespace
+unshare --time       # Create new time namespace (Linux 5.6+)
+
+# You can combine them:
+unshare --mount --pid --net bash
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+1. Mount Namespace (your question):
+
+# Create a new mount namespace
+unshare --mount bash
+
+# Now mount something - only visible in this namespace
+mkdir /tmp/mymount
+mount -t tmpfs tmpfs /tmp/mymount
+
+# This mount won't be visible outside the namespace!
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+2. User Namespace (like podman unshare):
+
+# Become "root" in a new user namespace
+unshare --user --map-root-user bash
+
+id  # Shows UID 0, but it's fake root!
+
+# You can now do root-like things:
+chown root:root /tmp/somefile  # Works!
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+3. Network Namespace:
+
+# Create isolated network
+unshare --net bash
+
+ip addr  # Only shows loopback, no eth0!
+
+# This is how container networking starts
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+4. PID Namespace:
+
+# Create new PID namespace
+unshare --pid --fork --mount-proc bash
+
+ps aux  # Only shows processes in this namespace!
+echo $$  # Shows PID 1 (you're init!)
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+5. Hostname Namespace:
+
+# Change hostname without affecting system
+unshare --uts bash
+
+hostname my-container
+hostname  # Shows "my-container"
+
+# Exit and check:
+exit
+hostname  # Back to original hostname
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+
+podman unshare is essentially a wrapper around unshare --user but with additional setup:
+
+# These are similar:
+unshare --user --map-root-user bash
+podman unshare bash
+
+
+But podman unshare does extra work:
+
+Sets up proper UID/GID mappings from /etc/subuid and /etc/subgid
+Configures the user namespace for Podman's needs
+Handles mount propagation correctly
+Sets up storage drivers properly
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+The error message you're seeing is likely coming from Podman itself, not from the rpi-image-gen script directly.
+
+podman unshare only works in rootless mode - i.e., when you're running Podman as a regular user. If you're running as actual root (UID 0), Podman will refuse to run unshare because:
+
+1. Root doesn't need user namespaces - root already has full privileges
+2. It's a conflict - you're asking for "fake root" when you're already real root
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+--privileged
+This gives the container almost unlimited access to the host system:
+
+Disables most security restrictions
+Gives access to all host devices
+Allows the container to do nearly anything the host can do
+Essentially removes container isolation
+
+
+-u root:root
+This runs the container as user root (UID 0) and group root (GID 0).
+
+You're running the container as actual root (-u root:root), which conflicts with podman unshare because:
+
+podman unshare creates a user namespace for rootless operations
+It expects to be run by a non-root user
+When you're already root, Podman says "you don't need unshare, you're already root!"
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+UID 0     = root (superuser)
+UID 1-999 = system users (daemons, services)
+UID 1000+ = regular human users
+
+First regular user created = UID 1000
+Second user = UID 1001
+Third user = UID 1002
+etc.

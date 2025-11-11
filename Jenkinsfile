@@ -17,7 +17,7 @@ pipeline {
                 //bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
 
                 // Step 2: Start build container with binfmt_misc mounted
-                bat 'docker run -d --name coinos-build --privileged -u root:root -e USER=root -e BDEBSTRAP_FORCE_ROOT=1 -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
+                bat 'docker run -d --name coinos-build --privileged -u 1000:1000 -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
 
                 // Step 2.5: Install QEMU inside the container
                 bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support"'
@@ -59,7 +59,7 @@ pipeline {
                 bat 'docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen layer --list"'
 
                 // Step 10: Build using our config with layer search path
-                bat 'docker exec coinos-build bash -c "export BDEBSTRAP_FORCE_ROOT=1 && cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml"'
+                bat 'docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml"'
 
                 // Step 11: Copy built image to workspace (so it survives container cleanup)
                 bat 'docker exec coinos-build bash -c "cp -r rpi-image-gen/image/ . || echo No image directory found"'

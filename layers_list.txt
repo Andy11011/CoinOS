@@ -1,0 +1,323 @@
+C:\ProgramData\Jenkins\.jenkins\workspace\CoinOS-Build>docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen layer --list" 
+  Loaded layer: coinos from coinos.yaml (x-env-layer)
+  Loaded layer: rpi-cm4 from cm4/device.yaml (x-env-layer)
+  Loaded layer: rpi-cm5 from cm5/device.yaml (x-env-layer)
+  Loaded layer: rpi3 from pi3/device.yaml (x-env-layer)
+  Loaded layer: rpi4 from pi4/device.yaml (x-env-layer)
+  Loaded layer: rpi5 from pi5/device.yaml (x-env-layer)
+  Loaded layer: rpizero2w from zero2w/device.yaml (x-env-layer)
+  Loaded layer: image-rota from gpt/ab_userdata/image.yaml (x-env-layer)
+  Loaded layer: image-rpios from mbr/simple_dual/image.yaml (x-env-layer)
+  Loaded layer: docker-debian-bookworm from app-container/docker/engine-bookworm.yaml (x-env-layer)
+  Loaded layer: docker-debian-trixie from app-container/docker/engine-trixie.yaml (x-env-layer)
+  Loaded layer: ca-certificates from app-misc/ca-certificates.yaml (x-env-layer)
+  Loaded layer: artefact-base from base/artefact-base.yaml (x-env-layer)
+  Loaded layer: essential from base/core-essential.yaml (x-env-layer)
+  Loaded layer: deploy-base from base/deploy-base.yaml (x-env-layer)
+  Loaded layer: device-base from base/device-base.yaml (x-env-layer)
+  Loaded layer: image-base from base/image-base.yaml (x-env-layer)
+  Loaded layer: locale-base from base/locale-base.yaml (x-env-layer)
+  Loaded layer: sys-build-base from base/sys-build-base.yaml (x-env-layer)
+  Loaded layer: target-config from base/target-config.yaml (x-env-layer)
+  Loaded layer: debian-bookworm-buildd from debian/bookworm/base-buildd.yaml (x-env-layer)
+  Loaded layer: debian-bookworm-arm64-multi from debian/bookworm/arm64/base-apt-multi.yaml (x-env-layer)
+  Loaded layer: debian-bookworm-arm64 from debian/bookworm/arm64/base-apt.yaml (x-env-layer)
+  Loaded layer: debian-bookworm-arm64-slim from debian/bookworm/arm64/base-slim.yaml (x-env-layer)
+  Loaded layer: debian-trixie-buildd from debian/trixie/base-buildd.yaml (x-env-layer)
+  Loaded layer: debian-trixie-arm64-multi from debian/trixie/arm64/base-apt-multi.yaml (x-env-layer)
+  Loaded layer: debian-trixie-arm64 from debian/trixie/arm64/base-apt.yaml (x-env-layer)
+  Loaded layer: debian-trixie-arm64-slim from debian/trixie/arm64/base-slim.yaml (x-env-layer)
+  Loaded layer: openssh-server from net-misc/openssh-server.yaml (x-env-layer)
+  Loaded layer: raspbian-bookworm-armhf from raspbian/bookworm/base-apt.yaml (x-env-layer)
+  Loaded layer: raspbian-trixie-armhf from raspbian/trixie/base-apt.yaml (x-env-layer)
+  Loaded layer: rpi-essential-base from rpi/essential.yaml (x-env-layer)
+  Loaded layer: rpi-misc-skel from rpi/misc-skel.yaml (x-env-layer)
+  Loaded layer: rpi-misc-utils from rpi/misc-utils.yaml (x-env-layer)
+  Loaded layer: rpi-user-credentials from rpi/user-credentials.yaml (x-env-layer)
+  Loaded layer: rpi-debian-bookworm from rpi/debian/bookworm/apt.yaml (x-env-layer)
+  Loaded layer: rpi-debian-trixie from rpi/debian/trixie/apt.yaml (x-env-layer)
+  Loaded layer: rpi-ab-slot-mapper from rpi/device/ab-slots.yaml (x-env-layer)
+  Loaded layer: rpi-boot-firmware from rpi/device/boot-firmware.yaml (x-env-layer)
+  Loaded layer: rpi-generic64 from rpi/device/family-generic64.yaml (x-env-layer)
+  Loaded layer: rpi-linux-2712 from rpi/device/arm64/linux-image-2712.yaml (x-env-layer)
+  Loaded layer: rpi-linux-v8 from rpi/device/arm64/linux-image-v8.yaml (x-env-layer)
+  Loaded layer: rpi-linux-v7 from rpi/device/armhf/linux-image-v7.yaml (x-env-layer)
+  Loaded layer: rpi-linux-v7l from rpi/device/armhf/linux-image-v7l.yaml (x-env-layer)
+  Loaded layer: rpi-connect-lite from rpi/device/services/rpi-connect-lite.yaml (x-env-layer)
+  Loaded layer: rpi-connect from rpi/device/services/rpi-connect.yaml (x-env-layer)
+  Loaded layer: rpi-splash-screen from rpi/device/splash-screen/splash-screen.yaml (x-env-layer)
+  Loaded layer: sbom-base from sbom/sbom.yaml (x-env-layer)
+  Loaded layer: bookworm-minbase from suite/debian/bookworm-minbase.yaml (x-env-layer)
+  Loaded layer: trixie-minbase from suite/debian/trixie-minbase.yaml (x-env-layer)
+  Loaded layer: fake-hwclock from sys-apps/fake-hwclock.yaml (x-env-layer)
+  Loaded layer: systemd-min from sys-apps/systemd-min.yaml (x-env-layer)
+  Loaded layer: systemd-net-min from sys-apps/systemd-net-min.yaml (x-env-layer)
+  Loaded layer: arm64-toolchain-cross from sys-devel/arm64-toolchain-cross.yaml (x-env-layer)
+  Loaded layer: arm64-toolchain-native from sys-devel/arm64-toolchain-native.yaml (x-env-layer)
+  Loaded layer: autotools-base from sys-devel/autotools-base.yaml (x-env-layer)
+  Loaded layer: build-user from sys-devel/build-user.yaml (x-env-layer)
+  Loaded layer: debian-dev-tools from sys-devel/debian-dev-tools.yaml (x-env-layer)
+  Loaded layer: gnu-common from sys-devel/gnu-common.yaml (x-env-layer)
+  Loaded layer: kbuild-base from sys-devel/kbuild-base.yaml (x-env-layer)
+
+Layer search paths:
+  1. ✓ /workspace/layer
+  2. ✓ /workspace/rpi-image-gen/device
+  3. ✓ /workspace/rpi-image-gen/image
+  4. ✓ /workspace/rpi-image-gen/layer
+
+Available layers:
+[1mCategory: audit[0m
+  [1msbom-base                  [0m  SBOM provider and settings.
+    deps: artefact-base
+    provides: none
+    requires-provider: none
+[1mCategory: build[0m
+  [1martefact-base              [0m  Base artefact naming, versioning and organisation for fil...
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mdeploy-base                [0m  Deployment and organisation for build output artefacts
+    deps: artefact-base, sys-build-base
+    provides: none
+    requires-provider: none
+  [1msys-build-base             [0m  Build environment configuration including workspace, apt ...
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mtarget-config              [0m  bdebstrap output target configuration.
+    deps: artefact-base, sys-build-base
+    provides: none
+    requires-provider: none
+[1mCategory: coinos[0m
+  [1mcoinos                     [0m  Base layer for Coinos node with essential packages
+    deps: debian-bookworm-arm64-multi, rpi-debian-bookworm, rpi-essential-base
+    provides: none
+    requires-provider: none
+[1mCategory: container[0m
+  [1mdocker-debian-bookworm     [0m  Docker engine and framework for Debian Bookworm
+    deps: rpi-user-credentials, sys-build-base
+    provides: docker
+    requires-provider: none
+  [1mdocker-debian-trixie       [0m  Docker engine and framework for Debian Trixie
+    deps: rpi-user-credentials, sys-build-base
+    provides: docker
+    requires-provider: none
+[1mCategory: device[0m
+  [1mdevice-base                [0m  Device defaults.
+    deps: none
+    provides: none
+    requires-provider: device
+  [1mrpi-cm4                    [0m  Raspberry Pi CM4 specific device layer
+    deps: rpi-generic64
+    provides: device
+    requires-provider: none
+  [1mrpi-cm5                    [0m  Raspberry Pi CM5 specific device layer
+    deps: device-base, rpi-boot-firmware, rpi-linux-2712
+    provides: device
+    requires-provider: none
+  [1mrpi-generic64              [0m  Generic Raspberry Pi device common with v8 kernel, boot f...
+    deps: device-base, rpi-boot-firmware, rpi-linux-v8
+    provides: none
+    requires-provider: none
+  [1mrpi3                       [0m  Raspberry Pi 3 specific device layer
+    deps: rpi-generic64
+    provides: device
+    requires-provider: none
+  [1mrpi4                       [0m  Raspberry Pi 4 specific device layer
+    deps: rpi-generic64
+    provides: device
+    requires-provider: none
+  [1mrpi5                       [0m  Raspberry Pi 5 specific device layer
+    deps: device-base, rpi-boot-firmware, rpi-linux-2712
+    provides: device
+    requires-provider: none
+  [1mrpizero2w                  [0m  Raspberry Pi Zero 2 W specific device layer
+    deps: rpi-generic64
+    provides: device
+    requires-provider: none
+[1mCategory: distribution[0m
+  [1mdebian-bookworm-arm64      [0m  Debian Bookworm apt base for arm64
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mdebian-bookworm-arm64-multi[0m  Debian Bookworm apt base for arm64 and armhf.
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mdebian-bookworm-arm64-slim [0m  Debian Bookworm custom layer for arm64 providing a usable...
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mdebian-bookworm-buildd     [0m  Architecture agnostic Debian Bookworm buildd base. This p...
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mdebian-trixie-arm64        [0m  Debian Trixie apt base for arm64.
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mdebian-trixie-arm64-multi  [0m  Debian Trixie apt base for arm64 and armhf.
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mdebian-trixie-arm64-slim   [0m  Debian Trixie custom layer for arm64 providing a usable a...
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mdebian-trixie-buildd       [0m  Architecture agnostic Debian Trixie buildd base. This pro...
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mraspbian-bookworm-armhf    [0m  Raspbian Bookworm apt base for armhf.
+    deps: locale-base
+    provides: none
+    requires-provider: none
+  [1mraspbian-trixie-armhf      [0m  Raspbian Trixie apt base for armhf.
+    deps: locale-base
+    provides: none
+    requires-provider: none
+[1mCategory: firmware[0m
+  [1mrpi-boot-firmware          [0m  Raspberry Pi boot firmware for all devices
+    deps: none
+    provides: none
+    requires-provider: none
+[1mCategory: foundation[0m
+  [1messential                  [0m  Serves as the mandatory foundation for all rpi-image-gen ...
+    deps: artefact-base, sys-build-base, target-config, locale-base
+    provides: none
+    requires-provider: none
+  [1mlocale-base                [0m  Default locale settings
+    deps: none
+    provides: none
+    requires-provider: none
+[1mCategory: general[0m
+  [1mca-certificates            [0m  Common CA Certificate PEM files
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mfake-hwclock               [0m  Persistent time management for non-RTC systems.
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mopenssh-server             [0m  OpenSSH server daemon and local user SSH key setup.
+    deps: rpi-user-credentials
+    provides: none
+    requires-provider: none
+  [1mrpi-debian-bookworm        [0m  Raspberry Pi Debian Bookworm APT repository
+    deps: none
+    provides: rpi-debian
+    requires-provider: none
+  [1mrpi-debian-trixie          [0m  Raspberry Pi Debian Trixie APT repository
+    deps: none
+    provides: rpi-debian
+    requires-provider: none
+  [1mrpi-essential-base         [0m  Raspberry Pi essential basic system packages
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mrpi-misc-skel              [0m  Raspberry Pi miscellaneous filesystem directory skeleton.
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mrpi-misc-utils             [0m  Raspberry Pi system utilities
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mrpi-splash-screen          [0m  Raspberry Pi fullscreen splash screen support with custom...
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mrpi-user-credentials       [0m  Raspberry Pi base layer for local user admin. Creates a l...
+    deps: none
+    provides: none
+    requires-provider: none
+  [1msystemd-min                [0m  Core systemd components for init, SysV compatibility and ...
+    deps: none
+    provides: none
+    requires-provider: none
+  [1msystemd-net-min            [0m  Systemd networking via networkd and resolved services
+    deps: systemd-min
+    provides: none
+    requires-provider: none
+[1mCategory: image[0m
+  [1mimage-base                 [0m  Default image settings and build attributes.
+    deps: sys-build-base, sbom-base, target-config, artefact-base, deploy-base
+    provides: none
+    requires-provider: device
+  [1mimage-rota                 [0m  Immutable GPT A/B layout for rotational OTA updates, boot...
+    deps: image-base, device-base, rpi-ab-slot-mapper, systemd-min
+    provides: image
+    requires-provider: none
+  [1mimage-rpios                [0m  Raspberry Pi OS style image layout with MBR, vfat boot pa...
+    deps: image-base
+    provides: image
+    requires-provider: none
+  [1mrpi-ab-slot-mapper         [0m  Dynamic slot device management for A/B boot: udev rules a...
+    deps: none
+    provides: none
+    requires-provider: none
+[1mCategory: kernel[0m
+  [1mrpi-linux-2712             [0m  Raspberry Pi 2712 kernel
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mrpi-linux-v7               [0m  Raspberry Pi v7 kernel
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mrpi-linux-v7l              [0m  Raspberry Pi v7l kernel
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mrpi-linux-v8               [0m  Raspberry Pi v8 kernel
+    deps: none
+    provides: none
+    requires-provider: none
+[1mCategory: service[0m
+  [1mrpi-connect                [0m  Raspberry Pi Connect client with screen-sharing support a...
+    deps: systemd-min, rpi-user-credentials
+    provides: rpi-connect-client
+    requires-provider: none
+  [1mrpi-connect-lite           [0m  Raspberry Pi Connect client with remote shell access
+    deps: systemd-min, rpi-user-credentials
+    provides: rpi-connect-client
+    requires-provider: none
+[1mCategory: suite[0m
+  [1mbookworm-minbase           [0m  Debian Bookworm with apt, utils, wired networking, ssh.
+    deps: debian-bookworm-arm64-multi, rpi-debian-bookworm, rpi-misc-utils, rpi-essential-base, rpi-misc-skel, rpi-user-credentials, systemd-net-min, fake-hwclock, openssh-server
+    provides: none
+    requires-provider: none
+  [1mtrixie-minbase             [0m  Debian Trixie with apt, utils, wired networking, ssh.
+    deps: debian-trixie-arm64-multi, rpi-debian-trixie, rpi-misc-utils, rpi-essential-base, rpi-misc-skel, rpi-user-credentials, systemd-net-min, openssh-server
+    provides: none
+    requires-provider: none
+[1mCategory: toolchain[0m
+  [1marm64-toolchain-cross      [0m  ARM64 cross-compilation toolchain
+    deps: none
+    provides: arm64-toolchain
+    requires-provider: none
+  [1marm64-toolchain-native     [0m  ARM64 native compilation toolchain
+    deps: none
+    provides: arm64-toolchain
+    requires-provider: none
+  [1mautotools-base             [0m  Autotools build environment
+    deps: gnu-common
+    provides: none
+    requires-provider: none
+  [1mbuild-user                 [0m  Environmental setup for dedicated build user
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mdebian-dev-tools           [0m  Debian package development and maintenance tools
+    deps: none
+    provides: none
+    requires-provider: none
+  [1mgnu-common                 [0m  Common GNU toolchain setup with ccache and environment
+    deps: ${DEB_HOST_ARCH}-toolchain-${TOOLCHAIN_MODE}, build-user
+    provides: none
+    requires-provider: none
+  [1mkbuild-base                [0m  Linux kernel build environment with Debian packaging supp...
+    deps: gnu-common
+    provides: none
+    requires-provider: none
