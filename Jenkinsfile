@@ -35,7 +35,7 @@ pipeline {
                 bat 'docker exec coinos-build bash -c "cat /proc/sys/fs/binfmt_misc/qemu-aarch64"'
 
                 // Step 3: Update and install basic dependencies
-                bat 'docker exec coinos-build bash -c "apt-get update && apt-get install -y git curl wget"'
+                bat 'docker exec -u root coinos-build bash -c "apt-get update && apt-get install -y git curl wget"'
 
                 // Step 4: Clone rpi-image-gen directly (instead of using submodule)
                 bat 'docker exec coinos-build bash -c "git clone https://github.com/raspberrypi/rpi-image-gen.git rpi-image-gen || echo \"pi-gen repo cloned\""'
