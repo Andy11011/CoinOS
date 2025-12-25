@@ -17,7 +17,7 @@ pipeline {
                 //bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
 
                 // Step 2: Start build container with binfmt_misc mounted
-                bat 'docker run -d --name coinos-build --privileged -u 1000:1000 -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
+                bat 'docker run -d --name coinos-build --privileged -u 1000:1000 -e USER=jenkins -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
 
                 // Step 2.5: Install QEMU inside the container
                 bat 'docker exec -u root coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support"'
