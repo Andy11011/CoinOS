@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'arm64'  // This tells Jenkins to run on your GCP ARM64 node
+        label 'arm64'
     }
     
     stages {
@@ -17,16 +17,26 @@ pipeline {
                     echo "Architecture: $(uname -m)"
                     echo "Working directory: $(pwd)"
                     
-                    # Install system dependencies
+                    # Install system dependencies (with sudo)
                     sudo apt-get update
-                    sudo apt-get install -y git curl wget
+                    sudo apt-get install -y git curl wget build-essential dosfstools
+                    
+                    # Verify mkdosfs is available
+                    which mkdosfs || echo "mkdosfs not found, checking installation..."
+                    mkdosfs --version || echo "Trying to locate mkdosfs..."
+                    
+                    # Sometimes mkdosfs is in /sbin which might not be in PATH for non-root users
+                    if [ -f "/sbin/mkdosfs" ]; then
+                        echo "Found mkdosfs in /sbin, adding to PATH"
+                        export PATH="/sbin:$PATH"
+                    fi
                     
                     # Clone rpi-image-gen if needed
                     if [ ! -d "rpi-image-gen" ]; then
                         git clone https://github.com/raspberrypi/rpi-image-gen.git
                     fi
                     
-                    # Install rpi-image-gen dependencies
+                    # Install rpi-image-gen dependencies (as root)
                     cd rpi-image-gen
                     sudo ./install_deps.sh
                     
@@ -39,6 +49,9 @@ pipeline {
             steps {
                 sh '''
                     echo "=== Building CoinOS on native ARM64 ==="
+                    
+                    # Make sure PATH includes /sbin for mkdosfs
+                    export PATH="/sbin:$PATH"
                     
                     # Build directly on ARM64 - no Docker needed!
                     # The -S flag points to source directory (current dir)
@@ -54,15 +67,31 @@ pipeline {
                 sh '''
                     echo "=== Generated artifacts ==="
                     
-                    # Look for built images
-                    find . -name "*.img" -o -name "*.img.*" 2>/dev/null | while read file; do
-                        echo "Found: $file"
-                        ls -lh "$file"
-                    done || echo "No image files found"
+                    # Look for built images - check in work directory
+                    if [ -d "work" ]; then
+                        echo "Checking work directory..."
+                        find work -name "*.img" -o -name "*.img.*" 2>/dev/null | while read file; do
+                            echo "Found: $file"
+                            ls -lh "$file"
+                        done || echo "No image files found in work/"
+                        
+                        # Also check for image-coinos-image directory
+                        if [ -d "work/image-coinos-image" ]; then
+                            echo "Checking image-coinos-image directory..."
+                            find work/image-coinos-image -type f -name "*.img*" 2>/dev/null
+                        fi
+                    else
+                        echo "No work directory found"
+                    fi
                     
-                    # Check work directory
-                    echo "=== Work directory contents ==="
-                    ls -la work/ 2>/dev/null || echo "No work directory"
+                    # Check rpi-image-gen's output directory too
+                    if [ -d "rpi-image-gen/work" ]; then
+                        echo "Checking rpi-image-gen/work directory..."
+                        find rpi-image-gen/work -name "*.img" -o -name "*.img.*" 2>/dev/null
+                    fi
+                    
+                    echo "=== Current directory contents ==="
+                    ls -la
                 '''
             }
         }
@@ -70,7 +99,7 @@ pipeline {
         stage('Archive Artifacts') {
             steps {
                 // Archive all image files and logs
-                archiveArtifacts artifacts: '**/*.img, **/*.img.*, build.log', fingerprint: true
+                archiveArtifacts artifacts: '**/*.img, **/*.img.*, build.log, work/**/*', fingerprint: true
             }
         }
     }
@@ -87,6 +116,7 @@ pipeline {
                 echo "=== Build completed ==="
                 echo "Node: ${NODE_NAME}"
                 echo "Workspace: ${WORKSPACE}"
+                echo "PATH: ${PATH}"
             '''
         }
     }
