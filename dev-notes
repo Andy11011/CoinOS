@@ -1983,3 +1983,13 @@ sudo chown -R jenkins:jenkins /home/jenkins
 # Go to Jenkins -> Manage Jenkins -> Nodes -> New Node
 # It will give you a command like:
 # java -jar agent.jar -jnlpUrl http://your-jenkins/computer/agent-name/slave-agent.jnlp -secret xxx -workDir "/home/jenkins"
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+coinos-image.img (2.7GB) - Complete disk image
+
+coinos-image.img.sparse (646MB) - Compressed sparse image
+
+The error is only happening during artifact archiving because Jenkins on Windows can't handle files with colons : in their names (like c250:0 in the filesystem).

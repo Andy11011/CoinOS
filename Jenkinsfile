@@ -95,11 +95,11 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Archive Artifacts') {
             steps {
-                // Archive all image files and logs
-                archiveArtifacts artifacts: '**/*.img, **/*.img.*, build.log, work/**/*', fingerprint: true
+                // Archive only the specific image files we want
+                archiveArtifacts artifacts: 'work/deploy-*/coinos-image.img, work/deploy-*/coinos-image.img.*, build.log', fingerprint: true
             }
         }
     }
