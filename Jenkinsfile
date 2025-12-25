@@ -17,10 +17,34 @@ pipeline {
                 //bat 'docker run --rm --privileged multiarch/qemu-user-static --reset -p yes'
 
                 // Step 2: Start build container with binfmt_misc mounted
-                bat 'docker run -d --name coinos-build --privileged -u 1000:1000 -e USER=jenkins -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
+                bat 'docker run -d --name coinos-build --privileged -u 1000:1000 -v "%CD%":/workspace -w /workspace debian:bookworm tail -f /dev/null'
+
+                // Step 2.1: Set up the user properly inside container
+                bat 'docker exec -u root coinos-build bash -c "useradd -m -u 1000 -s /bin/bash jenkins 2>/dev/null || true"'
+
+                // Give sudo access (no password for simplicity in CI)
+                bat 'docker exec -u root coinos-build bash -c "apt-get update && apt-get install -y sudo"'
+                bat 'docker exec -u root coinos-build bash -c "echo \"jenkins ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers.d/jenkins"'
+
+                // Create necessary directories
+                bat 'docker exec -u root coinos-build bash -c "mkdir -p /home/jenkins/.local/share/containers"'
+                bat 'docker exec -u root coinos-build bash -c "chown -R jenkins:jenkins /home/jenkins"'
+
+                // Set up subuid/subgid for rootless podman
+                bat 'docker exec -u root coinos-build bash -c "echo \"jenkins:100000:65536\" >> /etc/subuid"'
+                bat 'docker exec -u root coinos-build bash -c "echo \"jenkins:100000:65536\" >> /etc/subgid"'
 
                 // Step 2.5: Install QEMU inside the container
-                bat 'docker exec -u root coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support"'
+                bat 'docker exec -u root coinos-build bash -c "apt-get update && apt-get install -y qemu-user-static binfmt-support podman build-essential"'
+
+                // Step 2.6: Configure podman for rootless operation
+                bat 'docker exec -u jenkins coinos-build bash -c "mkdir -p \$HOME/.local/share/containers"'
+
+                // Step 2.6: Configure podman for rootless operation
+                bat 'docker exec -u jenkins coinos-build bash -c "podman system migrate"'
+
+                // Test podman works
+                bat 'docker exec -u jenkins coinos-build bash -c "podman --version && echo \"Podman installed\""'
 
                 // Step 2.6: Manually register QEMU interpreters (since the service didn't start)
                 bat 'docker exec -u root coinos-build bash -c "update-binfmts --enable"'
@@ -38,7 +62,7 @@ pipeline {
                 bat 'docker exec -u root coinos-build bash -c "apt-get update && apt-get install -y git curl wget"'
 
                 // Step 4: Clone rpi-image-gen directly (instead of using submodule)
-                bat 'docker exec coinos-build bash -c "git clone https://github.com/raspberrypi/rpi-image-gen.git rpi-image-gen || echo \"pi-gen repo cloned\""'
+                bat 'docker exec -u jenkins coinos-build bash -c "git clone https://github.com/raspberrypi/rpi-image-gen.git rpi-image-gen || echo \"pi-gen repo cloned\""'
                 
                 // Step 5: Show directory and files
                 bat 'docker exec coinos-build bash -c "pwd && ls -la"'
@@ -59,10 +83,10 @@ pipeline {
                 bat 'docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen layer --list"'
 
                 // Step 10: Build using our config with layer search path
-                bat 'docker exec coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml"'
+                bat 'docker exec -u jenkins -e USER=jenkins -e HOME=/home/jenkins coinos-build bash -c "cd /workspace && ./rpi-image-gen/rpi-image-gen build -S /workspace -c config/coinos-config.yaml"'
 
                 // Step 11: Copy built image to workspace (so it survives container cleanup)
-                bat 'docker exec coinos-build bash -c "cp -r rpi-image-gen/image/ . || echo No image directory found"'
+                bat 'docker exec -u jenkins coinos-build bash -c "cp -r rpi-image-gen/image/ . || echo No image directory found"'
 
                 // Step 12: Check if image was created
                 bat 'docker exec coinos-build bash -c "ls -la image/ || echo No image directory"'
