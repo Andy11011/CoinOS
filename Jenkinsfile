@@ -28,7 +28,7 @@ pipeline {
                     
                     # Install rpi-image-gen dependencies
                     cd rpi-image-gen
-                    ./install_deps.sh
+                    sudo ./install_deps.sh
                     
                     cd ..
                 '''
