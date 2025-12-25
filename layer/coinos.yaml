@@ -11,10 +11,7 @@ mmdebstrap:
     - echo "Setting up Coinos base layer"
   packages:
     # Docker
-    - docker-ce
-    - docker-ce-cli
-    - docker-compose-plugin
-    - containerd.io
+    - docker.io
     
     # System utilities
     - htop
