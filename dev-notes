@@ -1993,3 +1993,14 @@ coinos-image.img (2.7GB) - Complete disk image
 coinos-image.img.sparse (646MB) - Compressed sparse image
 
 The error is only happening during artifact archiving because Jenkins on Windows can't handle files with colons : in their names (like c250:0 in the filesystem).
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+✅ config.txt with enable_uart=1 (you added this)
+
+✅ cmdline.txt with console=serial0,115200 at start
+
+✅ COM port detected in Windows
