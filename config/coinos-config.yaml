@@ -11,7 +11,3 @@ image:
   name: coinos-image
   compression: zstd  # none, gzip, xz, zstd
 
-# config/coinos-config.yaml
-image_name: "coinos-image"
-image_type: "raspberrypi"
-output: "coinos.img"

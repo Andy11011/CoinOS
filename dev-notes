@@ -2072,3 +2072,10 @@ Loads start*.elf → Loads kernel → Hands control to ARM CPU → Linux boots
 │  │ USB │ │Eth. │ │SDIO │ │GPIO │ │I2C  │ │SPI  │ │UART │        │
 │  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘        │
 └─────────────────────────────────────────────────────────────────┘
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+ValueError: Section 'image_name' in /home/andy9/jenkins-workspace/workspace/CoinOS-Build/config/coinos-config.yaml must be a mapping
