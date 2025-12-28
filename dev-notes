@@ -2079,3 +2079,45 @@ Loads start*.elf → Loads kernel → Hands control to ARM CPU → Linux boots
 //--------------------//
 
 ValueError: Section 'image_name' in /home/andy9/jenkins-workspace/workspace/CoinOS-Build/config/coinos-config.yaml must be a mapping
+
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+[    3.847358]  mmcblk0: p1 p2
+[    3.852220] mmcblk0: mmc0:5048 SD64G 58.0 GiB
+[    3.857666] Freeing unused kernel memory: 5440K
+[    3.864166] Run /init as init process
+[    3.929048] mmc1: new high speed SDIO card at address 0001
+[    3.942940] SMSC LAN8700 usb-001:003:01: attached PHY driver (mii_bus:phy_addr=usb-001:003:01, irq=184)
+[    3.955170] smsc95xx 1-1.1:1.0 eth0: register 'smsc95xx' at usb-3f980000.usb-1.1, smsc95xx USB 2.0 Ethernet, b8:27:eb:ea:4e:17
+[    3.973712] smsc95xx 1-1.1:1.0 enxb827ebea4e17: renamed from eth0
+[    4.555534] EXT4-fs (mmcblk0p2): mounted filesystem 12013097-7891-4087-b211-53f55e3c6e08 ro with ordered data mode. Quota mode: none.
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+docker-compose/stable 2.26.1-4 arm64
+  Define and run multi-container applications with Docker (program)
+
+sudo apt-get install docker-compose
+
+
+sudo -E docker compose up -d
+
+
+//--------------------//
+//--------------------//
+//--------------------//
+
+andy9@raspberrypi:~ $ sudo docker container list
+CONTAINER ID   IMAGE                                                          COMMAND                  CREATED              STATUS                          PORTS                                       NAMES
+5d54af3e1517   registry.gitlab.com/andy91926/travisscanner:ngrok-latest       "ngrok start scanner"    58 seconds ago       Up 48 seconds                   0.0.0.0:4040->4040/tcp, :::4040->4040/tcp   ngrok
+2aeba8a4d817   registry.gitlab.com/andy91926/travisscanner:scannerL1-latest   "python /app/Scanner…"   58 seconds ago       Up 50 seconds                                                               scannerL1
+acc4354724b9   registry.gitlab.com/andy91926/scrapeproxy:scrapeProxy-latest   "uvicorn ScrapeProxy…"   58 seconds ago       Up 43 seconds                   0.0.0.0:8000->8000/tcp, :::8000->8000/tcp   scrapeproxy
+ead6803b55f4   redis:7-alpine                                                 "docker-entrypoint.s…"   About a minute ago   Up 52 seconds (healthy)         0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   redis
+8d68a0e7e2e2   containrrr/watchtower                                          "/watchtower scanner…"   About a minute ago   Restarting (1) 20 seconds ago                                               andy9-watchtower-1
+c9f72726cce0   postgres:14                                                    "docker-entrypoint.s…"   About a minute ago   Up 52 seconds                   5432/tcp                                    andy9-productiondb-1
